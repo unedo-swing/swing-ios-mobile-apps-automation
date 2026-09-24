@@ -87,7 +87,11 @@ def player_driver(request):
     if marker:
         strategy = marker.args[0] if marker.args else marker.kwargs.get("strategy")
         try:
-            app_helper.reset(instance, strategy, marker.kwargs.get("bundle_id"))
+            bundle_id = marker.kwargs.get("bundle_id")
+            if settings.PLAYER_TARGET == "simulator" and app_helper.normalize_strategy(strategy) == "clear":
+                app_helper.clear_data(instance, bundle_id)
+            else:
+                app_helper.reset(instance, strategy, bundle_id)
         except Exception as exc:
             log.warning(f"player app reset failed ({type(exc).__name__}: {exc})")
             app_helper.activate(instance)
