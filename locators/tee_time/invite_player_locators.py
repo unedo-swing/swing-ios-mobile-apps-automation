@@ -1,0 +1,11 @@
+class InvitePlayerLocators:
+    EL_TITLE = '//XCUIElementTypeOther[@name="Invite a player"]'
+    BTN_CLOSE = '//XCUIElementTypeOther[@name="Invite a player"]/following-sibling::XCUIElementTypeButton[1]'
+    BTN_CONFIRM = '//XCUIElementTypeOther[@name="Invite a player"]/following-sibling::XCUIElementTypeButton[2]'
+    EL_SEARCH_BAR = '//XCUIElementTypeOther[starts-with(@name,"Search your friend")]'
+    INPUT_SEARCH = '//XCUIElementTypeOther[starts-with(@name,"Search your friend")]/following-sibling::XCUIElementTypeTextField[1]'
+    TXT_SEARCH_HINT = '//XCUIElementTypeStaticText[starts-with(@name,"Search for your friend who already has a Swing account")]'
+    TXT_RESULT_COUNT = '//XCUIElementTypeStaticText[contains(@name,"search result(s) found")]'
+    TXT_FRIEND_BY_NAME = '(//XCUIElementTypeStaticText[contains(@name,"{}") and not(contains(@name,"result")) and not(starts-with(@name,"Search"))])[last()]'
+    BTN_KEYBOARD_SEARCH = '//XCUIElementTypeKeyboard//XCUIElementTypeButton[@name="Search"]'
+    TXT_SCRIM = '//XCUIElementTypeStaticText[@name="Scrim"]'

@@ -70,20 +70,5 @@ def event_package_flow(driver) -> EventPackageFlow:
 
 
 @pytest.fixture
-def player_login_flow(player_driver) -> LoginFlow:
-    return LoginFlow(player_driver)
-
-
-@pytest.fixture
-def player_home_flow(player_driver) -> HomeFlow:
-    return HomeFlow(player_driver)
-
-
-@pytest.fixture
 def host_group_flow(driver) -> GroupBookingFlow:
     return GroupBookingFlow(driver)
-
-
-@pytest.fixture
-def player_group_flow(player_driver) -> GroupBookingFlow:
-    return GroupBookingFlow(player_driver)

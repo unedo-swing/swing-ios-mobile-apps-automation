@@ -1,6 +1,8 @@
 from flows.tee_time_flow import TeeTimeFlow
 from pages.tee_time.group_booking_confirmation_page import GroupBookingConfirmationPage
+from pages.tee_time.group_booking_intro_page import GroupBookingIntroPage
 from pages.tee_time.group_booking_invitation_page import GroupBookingInvitationPage
+from pages.tee_time.invite_player_page import InvitePlayerPage
 from pages.tee_time.leave_group_booking_page import LeaveGroupBookingPage
 
 
@@ -9,20 +11,45 @@ class GroupBookingFlow(TeeTimeFlow):
 
     def __init__(self, driver, reporter=None):
         super().__init__(driver, reporter)
+        self.intro = self.page(GroupBookingIntroPage)
+        self.invite = self.page(InvitePlayerPage)
         self.confirm = self.page(GroupBookingConfirmationPage)
         self.invitation = self.page(GroupBookingInvitationPage)
         self.leave = self.page(LeaveGroupBookingPage)
 
-    def invite_group_player(self, player):
+    def choose_group_booking(self):
+        self.method.choose_group_booking()
+        self.intro.verify_screen()
+
+    def open_invite_from_intro(self):
+        self.intro.tap_invite_friends()
+        self.invite.verify_screen()
+
+    def open_invite_more(self):
         self.confirm.tap_invite_more()
-        self.player.verify_screen()
-        self.search_friend(player.get("search_keyword") or player.get("username"))
-        self.player.select_friend(player.get("username") or player.get("player"))
+        self.invite.verify_screen()
+
+    def pick_friend(self, player):
+        self.invite.search_friend(player.get("search_keyword") or player.get("username"))
+        self.invite.submit_search()
+        self.invite.select_friend(player.get("username") or player.get("player"))
+        if self.invite.is_loaded(3) and self.invite.confirm_is_enabled():
+            self.invite.tap_confirm()
+        assert self.invite.is_closed(), (
+            f"Invite a player sheet is still open after picking {player.get('player')}, "
+            f"the friend was not selected or the invite was not confirmed")
         self.confirm.verify_screen()
 
+    def invite_group_player(self, player, first=False):
+        if first:
+            self.open_invite_from_intro()
+        else:
+            self.open_invite_more()
+        self.pick_friend(player)
+
     def invite_group_players(self, players, total_players=""):
-        for player in self.players_to_invite(players, total_players):
-            self.invite_group_player(player)
+        for index, player in enumerate(self.players_to_invite(players, total_players)):
+            self.invite_group_player(player, first=index == 0)
             self.verify_player_added(player["player"])
             self.verify_player_waiting(player["player"])
 
@@ -102,8 +129,3 @@ class GroupBookingFlow(TeeTimeFlow):
             self.verify_promo_autoapplied(player["player"], player["promo_name"])
         if player.get("add_ons_name"):
             self.set_player_addons(player["player"], player["add_ons_name"], player.get("add_ons_qty", 1))
-
-    def prepare_invited_players(self, players, player_name):
-        for player in self.invited_players(players):
-            if player["player"] == player_name:
-                self.prepare_invited_player(player)

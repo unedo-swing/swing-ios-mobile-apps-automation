@@ -13,6 +13,7 @@ pytest_plugins = [
     "fixtures.app_fixtures",
     "fixtures.page_fixtures",
     "fixtures.flow_fixtures",
+    "fixtures.player_fixtures",
     "fixtures.data_fixtures",
 ]
 

@@ -1,5 +1,7 @@
 import pytest
 
+from pages.tee_time.group_booking_intro_page import GroupBookingIntroPage
+from pages.tee_time.invite_player_page import InvitePlayerPage
 from pages.activity.activity_page import ActivityPage
 from pages.app_rating_page import AppRatingPage
 from pages.booking_details_page import BookingDetailsPage
@@ -468,3 +470,13 @@ def card_linked_success_page(driver) -> CardLinkedSuccessPage:
 @pytest.fixture
 def confirm_credit_card_page(driver) -> ConfirmCreditCardPage:
     return ConfirmCreditCardPage(driver)
+
+
+@pytest.fixture
+def group_booking_intro_page(driver) -> GroupBookingIntroPage:
+    return GroupBookingIntroPage(driver)
+
+
+@pytest.fixture
+def invite_player_page(driver) -> InvitePlayerPage:
+    return InvitePlayerPage(driver)

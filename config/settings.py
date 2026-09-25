@@ -50,6 +50,14 @@ def get_int(key, default=0):
     return int(value)
 
 
+def get_path(key, default=None):
+    value = get(key, default)
+    if not value:
+        return value
+    path = Path(value).expanduser()
+    return str(path if path.is_absolute() else ROOT_DIR / path)
+
+
 def get_float(key, default=0.0):
     value = os.getenv(key)
     if value is None or value == "":
@@ -82,7 +90,7 @@ class Settings:
 
     APP_MODE = get("APP_MODE", "bundle_id").lower()
     BUNDLE_ID = get("BUNDLE_ID")
-    APP_PATH = get("APP_PATH")
+    APP_PATH = get_path("APP_PATH")
 
     APP_RESET_STRATEGY = get("APP_RESET_STRATEGY", "force_close").lower()
     REAL_DEVICE_ALLOW_CLEAR = get_bool("REAL_DEVICE_ALLOW_CLEAR", False)

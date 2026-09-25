@@ -25,6 +25,12 @@ def load_players(tc_id):
             "promo_code": str(row.get("PROMO_CODE") or ""),
             "add_ons_name": str(row.get("ADD_ONS_NAME") or ""),
             "add_ons_qty": int(row.get("ADD_ONS_QTY") or 1),
+            "country_name": str(row.get("COUNTRY_NAME") or ""),
+            "verification_method": str(row.get("VERIFICATION_METHOD") or ""),
+            "udid": str(row.get("DEVICE_UDID") or ""),
+            "device_name": str(row.get("DEVICE_NAME") or ""),
+            "platform_version": str(row.get("PLATFORM_VERSION") or ""),
+            "wda_port": int(row.get("WDA_PORT") or 0),
         })
     return sorted(players, key=lambda player: player["player_no"])
 
