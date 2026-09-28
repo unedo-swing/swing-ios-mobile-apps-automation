@@ -1,4 +1,6 @@
 from flows.tee_time_flow import TeeTimeFlow
+from helpers import amounts
+from helpers.checks import CheckTable
 from pages.tee_time.group_booking_confirmation_page import GroupBookingConfirmationPage
 from pages.tee_time.group_booking_intro_page import GroupBookingIntroPage
 from pages.tee_time.group_booking_invitation_page import GroupBookingInvitationPage
@@ -120,7 +122,7 @@ class GroupBookingFlow(TeeTimeFlow):
 
     def verify_host_will_pay(self):
         self.confirm.scroll_to_payment_note()
-        assert "Host will make the payment" in self.confirm.host_will_pay_text(), (
+        assert "Host will make the payment" in self.confirm.host_will_pay_text(), ( # type: ignore
             "player screen does not say the host will make the payment")
 
     def prepare_invited_player(self, player):
@@ -131,3 +133,18 @@ class GroupBookingFlow(TeeTimeFlow):
             self.verify_promo_autoapplied(player["player"], player["promo_name"])
         if player.get("add_ons_name"):
             self.set_player_addons(player["player"], player["add_ons_name"], player.get("add_ons_qty", 1))
+
+    def verify_players_used_credits(self, payment_information, players=None, host=""):
+        if not self.used_credits_applied(payment_information):
+            self.log.info("no player used swing credits on this group booking, skipping the credits check")
+            return
+        lines = payment_information.get("players") or {}
+        names = [player for player in self.payment_player_names(players, host) or list(lines)
+                 if lines.get(player, {}).get("used_credit")]
+        self.log.info(f"players using swing credits: {names}")
+        table = CheckTable("Swing Credits used")
+        for player in names:
+            table.truthy(f"{player} - credits line", lines[player]["used_credit"])
+        used = sum(abs(amounts.to_number(lines[player]["used_credit"])) for player in names)
+        table.amount("Credits total", payment_information.get("used_credit", ""), used)
+        table.verify()
