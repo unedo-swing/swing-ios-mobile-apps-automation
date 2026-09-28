@@ -153,7 +153,10 @@ class BasePage:
         return value
 
     def label_of(self, locator, timeout=None):
-        value = self.find(locator, timeout).get_attribute("label")
+        try:
+            value = self.find(locator, timeout).get_attribute("label")
+        except TimeoutException:
+            value = ""
         reporter.read("label of", locator, value)
         return value
 

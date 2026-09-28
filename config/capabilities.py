@@ -18,6 +18,7 @@ def build_capabilities(overrides=None):
         "appium:deviceId": settings.UDID,
         "appium:bundleId": settings.BUNDLE_ID,
         "appium:noReset": settings.NO_RESET,
+        "appium:isHeadless": True
     }
     caps = {key: value for key, value in caps.items() if value not in (None, "")}
 

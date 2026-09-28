@@ -10,7 +10,7 @@ class TeeTimeBookingConfirmationLocators:
     TXT_BOOKING_TYPE_BY_NAME = '//XCUIElementTypeStaticText[@name="{}"]'
     BTN_CHANGE_BOOKING_TYPE = '//XCUIElementTypeStaticText[@name="Standard Booking"]/following-sibling::XCUIElementTypeButton[1]'
     TXT_GROUP_BOOKING_HINT = '//XCUIElementTypeStaticText[starts-with(@name,"Adding a Swing Pass member?")]'
-    IMG_PLAYER_BY_NAME = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Publish"))]'
+    IMG_PLAYER_BY_NAME = '//*[starts-with(@name,"{}") and not(contains(@name,"Publish"))]'
     LIST_PLAYERS = '//XCUIElementTypeImage[contains(@name,"Swing player") or contains(@name,"Swing Pass member") or contains(@name,"Manually added player")]'
     EL_PROMO_BY_PLAYER = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Publish"))]/following-sibling::XCUIElementTypeOther[not(XCUIElementTypeOther[contains(@name,"add-ons")])][1]/XCUIElementTypeOther[1]'
     EL_ADDONS_BY_PLAYER = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Publish"))]/following-sibling::XCUIElementTypeOther[XCUIElementTypeOther[contains(@name,"add-ons")]][1]/XCUIElementTypeOther[contains(@name,"add-ons")]'

@@ -1,5 +1,7 @@
 from locators.tee_time.group_booking_confirmation_locators import GroupBookingConfirmationLocators as G
 from locators.tee_time.booking_confirmation_locators import TeeTimeBookingConfirmationLocators as L
+from selenium.common.exceptions import TimeoutException
+
 from helpers import waits
 from pages.tee_time.booking_confirmation_page import TeeTimeBookingConfirmationPage
 
@@ -57,17 +59,21 @@ class GroupBookingConfirmationPage(TeeTimeBookingConfirmationPage):
         return self.label_of(G.EL_PLAYER_STATUS.format(player))
 
     def is_player_ready(self, player, timeout=3):
-        return self.is_visible(G.EL_PLAYER_READY.format(player), timeout)
+        return self.is_present(G.EL_PLAYER_READY.format(player), timeout)
 
     def is_player_waiting(self, player, timeout=3):
-        return self.is_visible(G.EL_PLAYER_WAITING.format(player), timeout)
+        return self.is_present(G.EL_PLAYER_WAITING.format(player), timeout)
 
     def wait_player_ready(self, player, timeout=None):
-        self.scroll_to(L.IMG_PLAYER_BY_NAME.format(player), "down")
-        waits.wait_until_true(lambda: self.is_player_ready(player, 2), timeout or self.READY_TIMEOUT,
-                              interval=2, message=f"{player} is not ready")
+        self.bring_into_view(L.IMG_PLAYER_BY_NAME.format(player), "down")
+        try:
+            waits.wait_until_true(lambda: self.is_player_ready(player, 2), timeout or self.READY_TIMEOUT,
+                                  interval=2, message=f"{player} is not ready")
+        except TimeoutException:
+            self.capture_step("player_not_ready", player)
+            return False
         self.capture_step("player_ready", player)
-        return self
+        return True
 
     def wait_player_gone(self, player, timeout=None):
         waits.wait_until_true(lambda: not self.has_player(player, 2), timeout or self.READY_TIMEOUT,

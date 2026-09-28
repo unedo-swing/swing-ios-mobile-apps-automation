@@ -4,7 +4,7 @@ class GroupBookingConfirmationLocators:
     TXT_BOOKING_TYPE = '//XCUIElementTypeStaticText[@name="Group Booking"]'
     EL_PLAYER_STATUS = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Publish"))]/preceding-sibling::XCUIElementTypeOther[1]'
     EL_PLAYER_READY = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Publish"))]/preceding-sibling::XCUIElementTypeOther[1][contains(@name,"Ready!")]'
-    EL_PLAYER_WAITING = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Publish"))]/preceding-sibling::XCUIElementTypeOther[1][contains(@name,"Waiting for confirmation")]'
+    EL_PLAYER_WAITING = '//*[starts-with(@name,"{}") and contains(@name, "Waiting to join") and not(contains(@name,"Publish"))]'
     BTN_INVITE_MORE = '//XCUIElementTypeButton[starts-with(@name,"Invite up to")]'
     BTN_IM_READY = '//XCUIElementTypeButton[@name="I\'m ready"]'
     BTN_GO_BACK = '//XCUIElementTypeButton[@name="Go back"]'

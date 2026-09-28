@@ -58,7 +58,9 @@ class GroupBookingFlow(TeeTimeFlow):
             f"{player} is not waiting for confirmation, status {self.confirm.player_status_text(player)!r}")
 
     def wait_for_player_ready(self, player):
-        self.confirm.wait_player_ready(player)
+        assert self.confirm.wait_player_ready(player), (
+            f"{player} is not Ready! on the host screen after {self.confirm.READY_TIMEOUT}s, "
+            f"player card shows {self.confirm.player_status_text(player)!r}")
 
     def wait_for_players_ready(self, players, total_players=""):
         for player in self.players_to_invite(players, total_players):
