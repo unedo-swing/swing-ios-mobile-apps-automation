@@ -20,7 +20,7 @@ class PaymentGatewayPage(BasePage):
         self.capture_step("tap_proceed_to_pay")
         self.click(L.BTN_PROCEED_TO_PAY)
 
-    def has_proceed_to_pay(self, timeout=None):
+    def has_proceed_to_pay(self, timeout=10):
         return self.is_visible(L.BTN_PROCEED_TO_PAY, timeout or self.GATEWAY_TIMEOUT)
 
     def header_text(self, method):
