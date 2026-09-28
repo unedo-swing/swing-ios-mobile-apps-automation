@@ -1,5 +1,6 @@
 import pytest
 
+from config import settings as config
 from config.settings import settings
 from flows.group_booking_flow import GroupBookingFlow
 from flows.home_flow import HomeFlow
@@ -11,19 +12,27 @@ from helpers.logger import get_logger
 log = get_logger("fixture")
 
 
+def player_env(index, key):
+    value = config.get(f"PLAYER_{index + 1}_{key}")
+    if value is None and index == 0:
+        value = getattr(settings, f"PLAYER_{key}", None)
+    return value
+
+
 def player_capabilities(player, index=0):
-    first = index == 0
-    udid = player.get("udid") or (settings.PLAYER_UDID if first else "")
-    device_name = player.get("device_name") or (settings.PLAYER_DEVICE_NAME if first else "")
+    udid = player.get("udid") or player_env(index, "UDID")
+    device_name = player.get("device_name") or player_env(index, "DEVICE_NAME")
     if not (udid or device_name):
         raise ValueError(
-            f"no device for {player.get('player')}: fill Device UDID in the Players sheet")
+            f"no device for {player.get('player')}: set PLAYER_{index + 1}_UDID in the env file "
+            f"or Device UDID in the Players sheet")
     caps = {
         "appium:udid": udid,
         "appium:deviceId": udid,
         "appium:deviceName": device_name,
-        "appium:platformVersion": player.get("platform_version") or settings.PLAYER_PLATFORM_VERSION,
-        "appium:wdaLocalPort": player.get("wda_port") or settings.PLAYER_WDA_LOCAL_PORT + index,
+        "appium:platformVersion": player.get("platform_version") or player_env(index, "PLATFORM_VERSION"),
+        "appium:wdaLocalPort": player.get("wda_port") or int(player_env(index, "WDA_LOCAL_PORT") or 0)
+                               or settings.PLAYER_WDA_LOCAL_PORT + index,
         "appium:mjpegServerPort": settings.PLAYER_MJPEG_PORT + index,
     }
     return {key: value for key, value in caps.items() if value not in (None, "", 0)}
