@@ -68,7 +68,9 @@ def _clip(value, limit=120):
 class Reporter:
     def __init__(self):
         worker = os.getenv("PYTEST_XDIST_WORKER", "")
-        self.run_id = time.strftime("%Y%m%d_%H%M%S") + (f"_{worker}" if worker else "")
+        device = os.getenv("DEVICE", "").strip()
+        self.run_id = (time.strftime("%Y%m%d_%H%M%S") + (f"_device{device}" if device else "")
+                       + (f"_{worker}" if worker else ""))
         self.tests = []
         self.current = None
         self.driver = None

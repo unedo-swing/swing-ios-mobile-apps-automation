@@ -34,16 +34,36 @@ def worker_index():
     return int(worker[2:]) if worker.startswith("gw") and worker[2:].isdigit() else None
 
 
+def device_id():
+    return os.getenv("DEVICE", "").strip()
+
+
+def _copy_prefixed(prefix):
+    copied = 0
+    for key, value in list(os.environ.items()):
+        if key.startswith(prefix) and value != "":
+            os.environ[key[len(prefix):]] = value
+            copied += 1
+    return copied
+
+
+def _apply_device_env():
+    device = device_id()
+    if not device:
+        return
+    if not os.getenv(f"DEVICE_{device}_UDID"):
+        raise ValueError(f"DEVICE={device} is set but DEVICE_{device}_UDID is not in the env file")
+    _copy_prefixed(f"DEVICE_{device}_")
+
+
 def _apply_worker_env():
     index = worker_index()
     if index is None:
         return
-    prefix = f"WORKER_{index}_"
-    for key, value in list(os.environ.items()):
-        if key.startswith(prefix) and value != "":
-            os.environ[key[len(prefix):]] = value
+    _copy_prefixed(f"WORKER_{index}_")
 
 
+_apply_device_env()
 _apply_worker_env()
 
 

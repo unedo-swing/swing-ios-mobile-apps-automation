@@ -81,7 +81,7 @@ class BaseFlow:
         return self
 
     def open_deeplink(self, url):
-        device.open_deeplink(self.driver, url, settings.BUNDLE_ID)
+        device.open_deeplink(self.driver, url, app_helper.bundle_of(self.driver))
         return self
 
     def handle_system_alerts(self, accept=True, max_alerts=3):

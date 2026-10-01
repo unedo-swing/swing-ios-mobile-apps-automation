@@ -21,10 +21,32 @@ def session_driver():
     quit_driver(driver)
 
 
+def driver_overrides(request):
+    import os
+
+    from config.capabilities import device_overrides, marker_app, marker_device, resolve_app_path
+    from config.settings import worker_index
+
+    markers = list(request.node.iter_markers("device"))
+    device = marker_device(markers)
+    app = marker_app(markers)
+    index = worker_index()
+    if device is None and index is not None and not os.getenv(f"WORKER_{index}_UDID"):
+        pytest.fail(f"{request.node.name} has no @pytest.mark.device(<n>) and worker gw{index} "
+                    f"has no WORKER_{index}_UDID, so it would share a simulator with another worker")
+    overrides = device_overrides(device) if device is not None else {}
+    if app:
+        path = resolve_app_path(app)
+        if not os.path.exists(path):
+            pytest.fail(f"@pytest.mark.device app not found: {path}")
+        overrides.update({"appium:app": path, "appium:enforceAppInstall": True})
+    overrides.update(getattr(request, "param", None) or {})
+    return overrides or None
+
+
 @pytest.fixture(scope="function")
 def driver(request):
-    overrides = getattr(request, "param", None)
-    instance = create_driver(overrides)
+    instance = create_driver(driver_overrides(request))
     if settings.VIDEO_ON_FAILURE:
         try:
             media.start_recording(instance)

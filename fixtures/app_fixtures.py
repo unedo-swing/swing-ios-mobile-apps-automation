@@ -15,7 +15,7 @@ def _recover(driver, target, error):
     if app_helper.is_installed(driver, target):
         log.warning(f"falling back to force-close for {target}")
         return app_helper.force_close(driver, target)
-    path = settings.APP_PATH
+    path = app_helper.app_path_of(driver)
     log.warning(f"{target} is not installed any more, reinstalling from {path}")
     app_helper.install(driver, path)
     app_helper.activate(driver, target)
@@ -31,7 +31,7 @@ def apply_reset(request, driver):
     if marker:
         raw = marker.args[0] if marker.args else marker.kwargs.get("strategy")
         bundle_id = marker.kwargs.get("bundle_id")
-    target = bundle_id or settings.BUNDLE_ID
+    target = app_helper.bundle_of(driver, bundle_id)
     log.info(f"app reset {app_helper.normalize_strategy(raw)} for {target}")
     try:
         result = app_helper.reset(driver, raw, target)

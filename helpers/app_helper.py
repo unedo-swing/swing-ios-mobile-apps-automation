@@ -24,11 +24,24 @@ _STRATEGY_ALIASES = {
 }
 
 
-def _bundle(bundle_id=None):
-    target = bundle_id or settings.BUNDLE_ID
+def _session_cap(driver, name):
+    caps = getattr(driver, "capabilities", None) or {}
+    return caps.get(name) or caps.get(f"appium:{name}")
+
+
+def bundle_of(driver=None, bundle_id=None):
+    target = bundle_id or _session_cap(driver, "bundleId") or settings.BUNDLE_ID
     if not target:
         raise ValueError("bundle id is not configured")
     return target
+
+
+def app_path_of(driver=None, app_path=None):
+    return app_path or _session_cap(driver, "app") or settings.APP_PATH
+
+
+def _bundle(bundle_id=None, driver=None):
+    return bundle_of(driver, bundle_id)
 
 
 def install(driver, app_path):
@@ -37,23 +50,23 @@ def install(driver, app_path):
 
 
 def uninstall(driver, bundle_id=None):
-    driver.remove_app(_bundle(bundle_id))
+    driver.remove_app(_bundle(bundle_id, driver))
 
 
 def is_installed(driver, bundle_id=None):
-    return driver.is_app_installed(_bundle(bundle_id))
+    return driver.is_app_installed(_bundle(bundle_id, driver))
 
 
 def activate(driver, bundle_id=None):
-    driver.activate_app(_bundle(bundle_id))
+    driver.activate_app(_bundle(bundle_id, driver))
 
 
 def terminate(driver, bundle_id=None):
-    return driver.terminate_app(_bundle(bundle_id))
+    return driver.terminate_app(_bundle(bundle_id, driver))
 
 
 def force_close(driver, bundle_id=None):
-    target = _bundle(bundle_id)
+    target = _bundle(bundle_id, driver)
     driver.terminate_app(target)
     driver.activate_app(target)
     log.info(f"force-closed {target}")
@@ -68,7 +81,7 @@ def _blocked_on_real_device(action):
 
 
 def clear_data(driver, bundle_id=None):
-    target = _bundle(bundle_id)
+    target = _bundle(bundle_id, driver)
     driver.terminate_app(target)
     driver.execute_script("mobile: clearApp", {"bundleId": target})
     driver.activate_app(target)
@@ -77,12 +90,12 @@ def clear_data(driver, bundle_id=None):
 
 
 def clear(driver, bundle_id=None, app_path=None):
-    target = _bundle(bundle_id)
+    target = _bundle(bundle_id, driver)
     if not settings.is_real_device():
         return clear_data(driver, target)
     if _blocked_on_real_device("clear"):
         return force_close(driver, target)
-    path = app_path or settings.APP_PATH
+    path = app_path_of(driver, app_path)
     if not path:
         log.warning(f"APP_PATH not set, clear falls back to force-close for {target}")
         return force_close(driver, target)
@@ -103,10 +116,10 @@ def clear(driver, bundle_id=None, app_path=None):
 
 
 def reinstall(driver, bundle_id=None, app_path=None):
-    target = _bundle(bundle_id)
+    target = _bundle(bundle_id, driver)
     if _blocked_on_real_device("reinstall"):
         return force_close(driver, target)
-    path = app_path or settings.APP_PATH
+    path = app_path_of(driver, app_path)
     if not path:
         raise ValueError("APP_PATH is required for the reinstall strategy")
     try:
@@ -148,7 +161,7 @@ def restart(driver, bundle_id=None):
 
 
 def app_state(driver, bundle_id=None):
-    return driver.query_app_state(_bundle(bundle_id))
+    return driver.query_app_state(_bundle(bundle_id, driver))
 
 
 def is_running_foreground(driver, bundle_id=None):

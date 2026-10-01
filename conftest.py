@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 from pathlib import Path
@@ -26,6 +27,7 @@ def pytest_addoption(parser):
     parser.addoption("--app-reset", action="store", default=None)
 
 
+@pytest.hookimpl(tryfirst=True)
 def pytest_configure(config):
     import os
 
@@ -50,8 +52,17 @@ def pytest_configure(config):
         "app_reset(strategy, bundle_id=None): force_close, clear, reinstall or none",
     )
     config.addinivalue_line("markers", "group_booking: needs the host device plus the PLAYER_<n> devices")
+    _device_html_report(config)
     config.addinivalue_line("markers", "regression_existing: end to end booking per payment method on existing accounts")
+    config.addinivalue_line("markers", "device(n, app=None): run on the DEVICE_<n> block of the env file, optionally with a specific .app build")
     _validate_workers(config)
+
+
+def _device_html_report(config):
+    device = os.environ.get("DEVICE", "").strip()
+    htmlpath = getattr(config.option, "htmlpath", None)
+    if device and htmlpath == "reports/report.html":
+        config.option.htmlpath = f"reports/report_device{device}.html"
 
 
 def _validate_workers(config):
@@ -75,6 +86,15 @@ def _validate_workers(config):
         else:
             claimed[key] = owner
 
+    device_blocks = sorted({key[len("DEVICE_"):-len("_UDID")] for key in os.environ
+                            if key.startswith("DEVICE_") and key.endswith("_UDID") and os.environ[key]})
+    for device in device_blocks:
+        owner = f"device {device}"
+        claim("device", os.environ[f"DEVICE_{device}_UDID"], owner)
+        for port in ("WDA_LOCAL_PORT", "MJPEG_PORT"):
+            if os.getenv(f"DEVICE_{device}_{port}"):
+                claim("port", os.getenv(f"DEVICE_{device}_{port}"), owner)
+
     for index in range(count):
         owner = f"worker gw{index}"
 
@@ -83,7 +103,8 @@ def _validate_workers(config):
 
         udid = env("UDID")
         if not udid:
-            problems.append(f"WORKER_{index}_UDID is not set for {owner}")
+            if not device_blocks:
+                problems.append(f"WORKER_{index}_UDID is not set for {owner}")
             continue
         target = env("TARGET", os.getenv("TARGET", "simulator")).lower()
         if target not in ("simulator", "real_device"):
@@ -143,10 +164,17 @@ def _natural_key(text):
     )
 
 
+@pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(session, config, items):
     from config.settings import settings
     from helpers.logger import get_logger
 
+    from config.capabilities import marker_device
+
+    for item in items:
+        device = marker_device(list(item.iter_markers("device")))
+        if device is not None:
+            item.add_marker(pytest.mark.xdist_group(f"device_{device}"))
     if not settings.SORT_TESTS:
         return
     order = _feature_order()
