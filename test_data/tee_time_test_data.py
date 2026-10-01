@@ -19,6 +19,11 @@ class TeeTimeTestData(ExcelData):
     BOOKING_METHOD = "Standard"
     TOTAL_PLAYERS = "1"
     PAYMENT_METHOD = "DANA"
+    PAYMENT_TYPE = ""
+    CARD_NUMBER = ""
+    CARD_EXPIRY = ""
+    CARD_CVV = ""
+    CARD_OTP = ""
 
     TC_NAME = ""
     PLAYER_TYPE = ""

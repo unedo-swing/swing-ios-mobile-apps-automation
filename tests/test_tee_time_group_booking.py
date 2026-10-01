@@ -9,6 +9,8 @@ from test_data.player_data import load_players
 from test_data.tee_time_test_data import TeeTimeTestData as D
 
 
+@pytest.mark.group_booking
+@pytest.mark.xdist_group("group_booking")
 class TestTeeTimeGroupBooking:
 
     def _login(self, login_flow: LoginFlow, home_flow: HomeFlow, country, phone_number, method, otp):

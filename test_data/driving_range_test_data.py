@@ -25,6 +25,11 @@ class DrivingRangeTestData(ExcelData):
     PROMO_NAME = ""
     PROMO_CODE = "SWING123"
     PAYMENT_METHOD = "DANA"
+    PAYMENT_TYPE = ""
+    CARD_NUMBER = ""
+    CARD_EXPIRY = ""
+    CARD_CVV = ""
+    CARD_OTP = ""
     
     TC_NAME = ""
     

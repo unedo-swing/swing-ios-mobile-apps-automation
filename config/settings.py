@@ -29,6 +29,24 @@ def _load_env():
 _load_env()
 
 
+def worker_index():
+    worker = os.getenv("PYTEST_XDIST_WORKER", "")
+    return int(worker[2:]) if worker.startswith("gw") and worker[2:].isdigit() else None
+
+
+def _apply_worker_env():
+    index = worker_index()
+    if index is None:
+        return
+    prefix = f"WORKER_{index}_"
+    for key, value in list(os.environ.items()):
+        if key.startswith(prefix) and value != "":
+            os.environ[key[len(prefix):]] = value
+
+
+_apply_worker_env()
+
+
 def get(key, default=None):
     value = os.getenv(key)
     if value is None or value == "":
@@ -108,6 +126,7 @@ class Settings:
     PREBUILT_WDA_PATH = get("PREBUILT_WDA_PATH")
     WEBDRIVERAGENT_URL = get("WEBDRIVERAGENT_URL")
     WDA_LOCAL_PORT = get_int("WDA_LOCAL_PORT", 8100)
+    MJPEG_PORT = get_int("MJPEG_PORT", 0)
     WDA_LAUNCH_TIMEOUT = get_int("WDA_LAUNCH_TIMEOUT", 120000)
     WDA_CONNECTION_TIMEOUT = get_int("WDA_CONNECTION_TIMEOUT", 120000)
     WDA_STARTUP_RETRIES = get_int("WDA_STARTUP_RETRIES", 2)

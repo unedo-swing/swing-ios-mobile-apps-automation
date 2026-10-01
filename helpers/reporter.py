@@ -1,5 +1,6 @@
 import importlib
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -66,7 +67,8 @@ def _clip(value, limit=120):
 
 class Reporter:
     def __init__(self):
-        self.run_id = time.strftime("%Y%m%d_%H%M%S")
+        worker = os.getenv("PYTEST_XDIST_WORKER", "")
+        self.run_id = time.strftime("%Y%m%d_%H%M%S") + (f"_{worker}" if worker else "")
         self.tests = []
         self.current = None
         self.driver = None

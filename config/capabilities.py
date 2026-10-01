@@ -21,6 +21,10 @@ def build_capabilities(overrides=None):
         "appium:isHeadless": True
     }
     caps = {key: value for key, value in caps.items() if value not in (None, "")}
+    if settings.WDA_LOCAL_PORT:
+        caps["appium:wdaLocalPort"] = settings.WDA_LOCAL_PORT
+    if settings.MJPEG_PORT:
+        caps["appium:mjpegServerPort"] = settings.MJPEG_PORT
 
     if settings.EXTRA_CAPS:
         caps.update(json.loads(settings.EXTRA_CAPS))

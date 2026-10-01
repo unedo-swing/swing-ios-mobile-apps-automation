@@ -17,6 +17,9 @@ from pages.driving_range.dr_booking_details_page import DrBookingDetailsPage
 from pages.swing_credits.swing_credits_page import SwingCreditsPage
 from pages.swing_credits.credits_history_page import CreditsHistoryPage
 from pages.add_credit_card_page import AddCreditCardPage
+from pages.card_linked_success_page import CardLinkedSuccessPage
+from pages.confirm_credit_card_page import ConfirmCreditCardPage
+from pages.purchase_authentication_page import PurchaseAuthenticationPage
 from helpers import amounts
 
 
@@ -43,6 +46,9 @@ class DrivingRangeFlow(BaseFlow):
         self.credits = self.page(SwingCreditsPage)
         self.history = self.page(CreditsHistoryPage)
         self.credit_card = self.page(AddCreditCardPage)
+        self.authentication = self.page(PurchaseAuthenticationPage)
+        self.card_linked = self.page(CardLinkedSuccessPage)
+        self.confirm_card = self.page(ConfirmCreditCardPage)
 
     # ----------------------------- actions -----------------------------
 
@@ -240,6 +246,34 @@ class DrivingRangeFlow(BaseFlow):
         if is_primary:
             self.credit_card.toggle_primary_method()
     
+
+    def link_new_credit_card(self, card_name, card_number, card_expiry, card_cvv, otp):
+        self.confirm.open_payment_method()
+        self.payment.verify_screen()
+        self.payment.add_credit_card()
+        self.credit_card.verify_screen()
+        self.credit_card.enter_cardholder_name(card_name)
+        self.credit_card.enter_card_number(card_number)
+        self.credit_card.enter_expiry_date(card_expiry)
+        self.credit_card.enter_cvv(card_cvv)
+        self.credit_card.tap_save_credit_card()
+        self.authenticate_card(otp)
+        self.card_linked.verify_screen()
+        self.card_linked.tap_close()
+        self.confirm.verify_screen()
+
+    def authenticate_card(self, otp):
+        self.authentication.verify_screen()
+        self.authentication.enter_otp_code(otp)
+        self.authentication.tap_submit()
+
+    def pay_now_with_credit_card(self, card_cvv, otp):
+        self.confirm.tap_pay_now()
+        self.confirm_card.verify_screen()
+        self.confirm_card.enter_cvv(card_cvv)
+        self.confirm_card.tap_confirm()
+        if self.authentication.is_loaded(15):
+            self.authenticate_card(otp)
 
     # --------------------------- verifications ---------------------------
 

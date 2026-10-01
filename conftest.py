@@ -49,6 +49,60 @@ def pytest_configure(config):
         "markers",
         "app_reset(strategy, bundle_id=None): force_close, clear, reinstall or none",
     )
+    config.addinivalue_line("markers", "group_booking: needs the host device plus the PLAYER_<n> devices")
+    config.addinivalue_line("markers", "regression_existing: end to end booking per payment method on existing accounts")
+    _validate_workers(config)
+
+
+def _validate_workers(config):
+    import os
+
+    if os.getenv("PYTEST_XDIST_WORKER"):
+        return
+    count = getattr(config.option, "numprocesses", None)
+    if not count:
+        return
+    if not isinstance(count, int):
+        raise pytest.UsageError(
+            f"-n {count} is not supported, pass a number: every worker needs its own WORKER_<n>_UDID")
+    problems = []
+    claimed = {}
+
+    def claim(kind, value, owner):
+        key = (kind, str(value))
+        if key in claimed:
+            problems.append(f"{owner} uses {kind} {value}, already used by {claimed[key]}")
+        else:
+            claimed[key] = owner
+
+    for index in range(count):
+        owner = f"worker gw{index}"
+
+        def env(name, default=None):
+            return os.getenv(f"WORKER_{index}_{name}") or default
+
+        udid = env("UDID")
+        if not udid:
+            problems.append(f"WORKER_{index}_UDID is not set for {owner}")
+            continue
+        target = env("TARGET", os.getenv("TARGET", "simulator")).lower()
+        if target not in ("simulator", "real_device"):
+            problems.append(f"WORKER_{index}_TARGET must be simulator or real_device, found {target}")
+        claim("device", udid, owner)
+        claim("port", env("WDA_LOCAL_PORT", os.getenv("WDA_LOCAL_PORT", "8100")), owner)
+        if env("MJPEG_PORT"):
+            claim("port", env("MJPEG_PORT"), owner)
+
+    player = 1
+    while os.getenv(f"PLAYER_{player}_UDID"):
+        owner = f"group booking player {player}"
+        claim("device", os.getenv(f"PLAYER_{player}_UDID"), owner)
+        claim("port", os.getenv(f"PLAYER_{player}_WDA_LOCAL_PORT") or 8100 + player, owner)
+        claim("port", int(os.getenv("PLAYER_MJPEG_PORT") or 9101) + player - 1, owner)
+        player += 1
+
+    if problems:
+        raise pytest.UsageError("parallel device setup is not valid:\n  - " + "\n  - ".join(problems))
 
 
 FEATURE_ORDER = (

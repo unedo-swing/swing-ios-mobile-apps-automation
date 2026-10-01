@@ -384,5 +384,49 @@ class TestDrivingRange:
         driving_range_flow.open_swing_credits()
         driving_range_flow.open_swing_credit_history()
         driving_range_flow.verify_used_credit_booking_code(booking_code, payment_information["used_credit"])
-            
-        
+
+    def _open_regression_booking(self, driving_range_flow: DrivingRangeFlow):
+        driving_range_flow.open_driving_range(D.MEMBER_TYPE)
+        driving_range_flow.open_search()
+        driving_range_flow.search_driving_range(D.SEARCH_KEYWORD)
+        driving_range_flow.open_result(D.VENUE)
+        driving_range_flow.open_calendar()
+        driving_range_flow.choose_date(D.BOOKING_DATE)
+        driving_range_flow.choose_bay_type(D.BAY_TYPE)
+        driving_range_flow.choose_time(D.BOOKING_START_TIME, D.BOOKING_END_TIME)
+        driving_range_flow.book_driving_range()
+        driving_range_flow.set_bays(D.NUMBER_OF_BAYS)
+        driving_range_flow.confirm_bays()
+        driving_range_flow.remove_promo()
+
+    def _verify_regression_booking(self, driving_range_flow: DrivingRangeFlow, payment_information):
+        driving_range_flow.verify_payment_success_driving_range(D.PLAYER_NAME, D.BOOKING_DATE, D.BOOKING_START_TIME, D.BOOKING_END_TIME, D.NUMBER_OF_BAYS, payment_information, D.BAY_TYPE)
+        booking_code = driving_range_flow.get_booking_code_after_payment()
+        driving_range_flow.open_booking_details()
+        driving_range_flow.verify_data_booking_details_without_credit_used(booking_code, D.PLAYER_NAME, D.BOOKING_DATE, D.BOOKING_START_TIME, D.BOOKING_END_TIME, D.NUMBER_OF_BAYS, payment_information, D.BAY_TYPE)
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["DR_REGRESS_GSA_001"])
+    def test_regression_existing_book_driving_range_with_credit_card(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
+        D.load(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._login(login_flow, home_flow)
+        self._open_regression_booking(driving_range_flow)
+        driving_range_flow.link_new_credit_card(D.PLAYER_NAME, D.CARD_NUMBER, D.CARD_EXPIRY, D.CARD_CVV, D.CARD_OTP)
+        payment_information = driving_range_flow.get_payment_information_before_payment("0")
+        driving_range_flow.pay_now_with_credit_card(D.CARD_CVV, D.CARD_OTP)
+        self._verify_regression_booking(driving_range_flow, payment_information)
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["DR_REGRESS_GSA_002", "DR_REGRESS_GSA_003", "DR_REGRESS_GSA_004", "DR_REGRESS_GSA_005", "DR_REGRESS_GSA_006", "DR_REGRESS_GSA_007", "DR_REGRESS_GSA_008", "DR_REGRESS_GSA_009", "DR_REGRESS_GSA_010", "DR_REGRESS_GSA_011", "DR_REGRESS_GSA_012", "DR_REGRESS_GSA_013", "DR_REGRESS_GSA_014"])
+    def test_regression_existing_book_driving_range_by_payment_method(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
+        D.load(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._login(login_flow, home_flow)
+        self._open_regression_booking(driving_range_flow)
+        driving_range_flow.choose_payment_method(D.PAYMENT_METHOD)
+        payment_information = driving_range_flow.get_payment_information_before_payment("0")
+        driving_range_flow.pay_now()
+        self._verify_regression_booking(driving_range_flow, payment_information)
