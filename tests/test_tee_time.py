@@ -2,6 +2,7 @@ import pytest
 
 from flows.home_flow import HomeFlow
 from flows.login_flow import LoginFlow
+from flows.payment_callback_flow import PaymentCallbackFlow
 from flows.tee_time_flow import TeeTimeFlow
 from helpers.pdf_report import init_pdf
 from test_data.add_ons_data import load_add_ons
@@ -300,17 +301,18 @@ class TestTeeTime:
         tee_time_flow.open_swing_credit_history()
         tee_time_flow.verify_used_credit_booking_code_players(booking_code, payment_information, PLAYERS, D.HOST_NAME)
 
-    def _verify_regression_booking(self, tee_time_flow: TeeTimeFlow, PLAYERS, payment_information, payment_method=""):
+    def _verify_regression_booking(self, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow, PLAYERS, payment_information, payment_method=""):
         tee_time_flow.verify_payment_information(payment_information, PLAYERS, D.HOST_NAME)
         booking_code = tee_time_flow.get_booking_code_after_payment()
         tee_time_flow.verify_payment_success_players(D.BOOKING_DATE, D.SESSION, D.PREFERRED_TIME, payment_information, PLAYERS, D.VENUE, payment_method)
         tee_time_flow.open_booking_details()
         tee_time_flow.verify_booking_details_players(booking_code, D.BOOKING_DATE, D.SESSION, D.PREFERRED_TIME, payment_information, PLAYERS)
+        payment_callback_flow.verify_existing_payment_callback(booking_code)
 
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression_existing
     @pytest.mark.parametrize("TC_ID", ["TT_REGRESS_GSA_001"])
-    def test_regression_existing_book_tee_time_with_credit_card(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow):
+    def test_regression_existing_book_tee_time_with_credit_card(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow):
         D.load(TC_ID)
         PLAYERS = load_players(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
@@ -320,12 +322,12 @@ class TestTeeTime:
         tee_time_flow.link_new_credit_card(D.HOST_NAME, D.CARD_NUMBER, D.CARD_EXPIRY, D.CARD_CVV, D.CARD_OTP)
         payment_information = tee_time_flow.get_payment_information_before_payment("0", PLAYERS, D.HOST_NAME)
         tee_time_flow.pay_now_with_credit_card(D.CARD_CVV, D.CARD_OTP)
-        self._verify_regression_booking(tee_time_flow, PLAYERS, payment_information)
+        self._verify_regression_booking(tee_time_flow, payment_callback_flow, PLAYERS, payment_information)
 
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression_existing
     @pytest.mark.parametrize("TC_ID", ["TT_REGRESS_GSA_002", "TT_REGRESS_GSA_003", "TT_REGRESS_GSA_004", "TT_REGRESS_GSA_005", "TT_REGRESS_GSA_006", "TT_REGRESS_GSA_007", "TT_REGRESS_GSA_008", "TT_REGRESS_GSA_009", "TT_REGRESS_GSA_010", "TT_REGRESS_GSA_011", "TT_REGRESS_GSA_012", "TT_REGRESS_GSA_013", "TT_REGRESS_GSA_014"])
-    def test_regression_existing_book_tee_time_by_payment_method(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow):
+    def test_regression_existing_book_tee_time_by_payment_method(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow):
         D.load(TC_ID)
         PLAYERS = load_players(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
@@ -335,4 +337,4 @@ class TestTeeTime:
         tee_time_flow.choose_payment_method(D.PAYMENT_METHOD)
         payment_information = tee_time_flow.get_payment_information_before_payment("0", PLAYERS, D.HOST_NAME)
         tee_time_flow.pay_now()
-        self._verify_regression_booking(tee_time_flow, PLAYERS, payment_information, D.PAYMENT_METHOD)
+        self._verify_regression_booking(tee_time_flow, payment_callback_flow, PLAYERS, payment_information, D.PAYMENT_METHOD)
