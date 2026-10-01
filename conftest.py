@@ -114,14 +114,6 @@ def _validate_workers(config):
         if env("MJPEG_PORT"):
             claim("port", env("MJPEG_PORT"), owner)
 
-    player = 1
-    while os.getenv(f"PLAYER_{player}_UDID"):
-        owner = f"group booking player {player}"
-        claim("device", os.getenv(f"PLAYER_{player}_UDID"), owner)
-        claim("port", os.getenv(f"PLAYER_{player}_WDA_LOCAL_PORT") or 8100 + player, owner)
-        claim("port", int(os.getenv("PLAYER_MJPEG_PORT") or 9101) + player - 1, owner)
-        player += 1
-
     if problems:
         raise pytest.UsageError("parallel device setup is not valid:\n  - " + "\n  - ".join(problems))
 

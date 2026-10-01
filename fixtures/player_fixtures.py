@@ -1,3 +1,6 @@
+import os
+import re
+
 import pytest
 
 from config import settings as config
@@ -58,14 +61,35 @@ class PlayerDevice:
         self.group = GroupBookingFlow(driver)
 
 
+def busy_devices(host_udid=None):
+    busy = {str(host_udid): "the host device of this test"} if host_udid else {}
+    if not os.getenv("PYTEST_XDIST_WORKER"):
+        return busy
+    for key, value in os.environ.items():
+        match = re.fullmatch(r"(DEVICE|WORKER)_(\w+?)_(UDID|WDA_LOCAL_PORT|MJPEG_PORT)", key)
+        if match and value:
+            busy.setdefault(str(value), f"{match.group(1)}_{match.group(2)} in this parallel run")
+    return busy
+
+
 class PlayerDevices:
-    def __init__(self, strategy=None, bundle_id=None):
+    def __init__(self, strategy=None, bundle_id=None, host_udid=None):
         self.strategy = strategy
         self.bundle_id = bundle_id
+        self.host_udid = host_udid
         self.devices = []
+
+    def check_free(self, player, caps):
+        busy = busy_devices(self.host_udid)
+        for name in ("appium:udid", "appium:wdaLocalPort", "appium:mjpegServerPort"):
+            value = str(caps.get(name, ""))
+            if value in busy:
+                pytest.fail(f"group booking player {player['player']} uses {name.split(':')[1]} {value}, "
+                            f"which is also used by {busy[value]}")
 
     def open(self, player):
         caps = player_capabilities(player, len(self.devices))
+        self.check_free(player, caps)
         log.info(f"opening player device for {player['player']}: {caps}")
         driver = create_driver(caps)
         self.devices.append(PlayerDevice(player, driver))
@@ -95,6 +119,7 @@ def player_devices(request, driver):
     if marker:
         strategy = marker.args[0] if marker.args else marker.kwargs.get("strategy")
         bundle_id = marker.kwargs.get("bundle_id")
-    devices = PlayerDevices(strategy, bundle_id)
+    host_caps = getattr(driver, "capabilities", None) or {}
+    devices = PlayerDevices(strategy, bundle_id, host_caps.get("udid") or host_caps.get("appium:udid"))
     yield devices
     devices.close_all(getattr(request.node, "test_failed", False), request.node.name)
