@@ -14,7 +14,7 @@ class RegistrationConfirmationLocators:
     IMG_PLAYER_BY_NAME = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Registration fee"))]'
     LIST_PLAYERS = '//XCUIElementTypeImage[contains(@name,"Swing Pass member") or contains(@name,"Manually added player")]'
     EL_PROMO_BY_PLAYER = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Registration fee"))]/following-sibling::XCUIElementTypeOther[XCUIElementTypeOther[@name="Apply a promo"]]'
-    EL_PLAYER_DETAILS_BY_PLAYER = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Registration fee"))]/following-sibling::XCUIElementTypeOther[XCUIElementTypeOther[@name="Fill in player details"]]'
+    EL_PLAYER_DETAILS_BY_PLAYER = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Registration fee"))]/following-sibling::XCUIElementTypeOther//XCUIElementTypeOther[contains(@name, "player details")]'
     IMG_CHANGE_PLAYER_BY_NAME = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Registration fee"))]/following-sibling::XCUIElementTypeImage[@name="Change player"]'
     IMG_REMOVE_PLAYER_BY_NAME = '//XCUIElementTypeImage[starts-with(@name,"{}") and not(contains(@name,"Registration fee"))]/following-sibling::XCUIElementTypeImage[@name="Remove player"]'
     EL_APPLY_PROMO = '//XCUIElementTypeOther[@name="Apply a promo"]'

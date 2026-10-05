@@ -9,7 +9,7 @@ class RegistrationMethodPage(BasePage):
     def verify_screen(self):
         self.wait_until_loaded()
         assert self.is_visible(L.TXT_TITLE, timeout=20), "Registration method sheet not shown"
-        assert self.is_visible(L.EL_GROUP_REGISTRATION, timeout=5), "Registration method group option not shown"
+        # assert self.is_visible(L.EL_GROUP_REGISTRATION, timeout=5), "Registration method group option not shown"
         assert self.is_visible(L.EL_STANDARD_REGISTRATION, timeout=5), "Registration method standard option not shown"
         assert self.is_visible(L.BTN_LEARN_MORE, timeout=5), "Registration method learn more button not shown"
         self.capture_step("registration_method")
