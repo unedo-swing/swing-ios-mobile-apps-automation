@@ -60,6 +60,27 @@ class BaseFlow:
         names = ([host] if host else []) + self.player_names(invited)
         return list(dict.fromkeys(name for name in names if name))
 
+    SIMULATED_PAYMENT_TYPES = ("qris", "virtual account")
+
+    def simulate_gateway_payment(self, payment_method, payment_type):
+        kind = str(payment_type or "").strip().lower()
+        if kind not in self.SIMULATED_PAYMENT_TYPES:
+            return None
+        from helpers.api_client import ApiClient
+        from helpers.db_queries import pending_booking_payment
+
+        payment = pending_booking_payment(payment_method)
+        client = ApiClient.swing()
+        if kind == "qris":
+            response = client.simulate_qr_payment(payment["id"])
+        else:
+            response = client.simulate_va_payment(payment["id"], payment["value"])
+        self.log.info(f"simulated {payment['payment_method']} payment order {payment['id']} "
+                      f"amount {payment['value']}: HTTP {response.status} {response.text[:300]}")
+        self.step(f"Simulate {payment['payment_method']} payment, order {payment['id']}")
+        response.raise_for_status()
+        return payment["id"]
+
     def step(self, description):
         self.reporter.step(description)
         return self

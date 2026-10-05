@@ -13,8 +13,8 @@ from pages.tee_time.add_ons_page import AddOnsPage
 from pages.tee_time.add_player_page import AddPlayerPage
 from pages.country_picker_page import CountryPickerPage
 from pages.tee_time.group_booking_info_page import GroupBookingInfoPage
-from pages.driving_range.payment_method_page import PaymentMethodPage
-from pages.driving_range.payment_gateway_page import PaymentGatewayPage
+from pages.payment_method_page import PaymentMethodPage
+from pages.payment_gateway_page import PaymentGatewayPage
 from pages.tee_time.booking_success_page import TeeTimeBookingSuccessPage
 from pages.tee_time.tt_booking_details_page import TeeTimeBookingDetailsPage
 from pages.tee_time.booking_summary_page import TeeTimeBookingSummaryPage

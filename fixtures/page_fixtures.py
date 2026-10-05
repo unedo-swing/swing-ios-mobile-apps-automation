@@ -20,8 +20,8 @@ from pages.driving_range.driving_range_details_page import DrivingRangeDetailsPa
 from pages.driving_range.featured_promos_page import FeaturedPromosPage
 from pages.driving_range.driving_range_list_page import DrivingRangeListPage
 from pages.driving_range.driving_range_search_page import DrivingRangeSearchPage
-from pages.driving_range.payment_gateway_page import PaymentGatewayPage
-from pages.driving_range.payment_method_page import PaymentMethodPage
+from pages.payment_gateway_page import PaymentGatewayPage
+from pages.payment_method_page import PaymentMethodPage
 from pages.onboarding.birthday_picker_page import BirthdayPickerPage
 from pages.event.add_player_page import EventAddPlayerPage
 from pages.event.event_details_page import EventDetailsPage

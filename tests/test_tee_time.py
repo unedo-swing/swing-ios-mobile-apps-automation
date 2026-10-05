@@ -326,8 +326,8 @@ class TestTeeTime:
 
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression_existing
-    @pytest.mark.parametrize("TC_ID", ["TT_REGRESS_GSA_002", "TT_REGRESS_GSA_003", "TT_REGRESS_GSA_004", "TT_REGRESS_GSA_005", "TT_REGRESS_GSA_006", "TT_REGRESS_GSA_007", "TT_REGRESS_GSA_008", "TT_REGRESS_GSA_009", "TT_REGRESS_GSA_010", "TT_REGRESS_GSA_011", "TT_REGRESS_GSA_012", "TT_REGRESS_GSA_013", "TT_REGRESS_GSA_014"])
-    def test_regression_existing_book_tee_time_by_payment_method(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow):
+    @pytest.mark.parametrize("TC_ID", ["TT_REGRESS_GSA_003", "TT_REGRESS_GSA_004", "TT_REGRESS_GSA_005", "TT_REGRESS_GSA_006"])
+    def test_regression_existing_book_tee_time_with_ewallet(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow):
         D.load(TC_ID)
         PLAYERS = load_players(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
@@ -337,4 +337,36 @@ class TestTeeTime:
         tee_time_flow.choose_payment_method(D.PAYMENT_METHOD)
         payment_information = tee_time_flow.get_payment_information_before_payment("0", PLAYERS, D.HOST_NAME)
         tee_time_flow.pay_now()
+        self._verify_regression_booking(tee_time_flow, payment_callback_flow, PLAYERS, payment_information, D.PAYMENT_METHOD)
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["TT_REGRESS_GSA_002"])
+    def test_regression_existing_book_tee_time_with_qris(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow):
+        D.load(TC_ID)
+        PLAYERS = load_players(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._login(login_flow, home_flow)
+        self._open_standard_booking(tee_time_flow)
+        tee_time_flow.remove_promo(D.HOST_NAME)
+        tee_time_flow.choose_payment_method(D.PAYMENT_METHOD)
+        payment_information = tee_time_flow.get_payment_information_before_payment("0", PLAYERS, D.HOST_NAME)
+        tee_time_flow.pay_now()
+        tee_time_flow.simulate_gateway_payment(D.PAYMENT_METHOD, "QRIS")
+        self._verify_regression_booking(tee_time_flow, payment_callback_flow, PLAYERS, payment_information, D.PAYMENT_METHOD)
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["TT_REGRESS_GSA_007", "TT_REGRESS_GSA_008", "TT_REGRESS_GSA_009", "TT_REGRESS_GSA_010", "TT_REGRESS_GSA_011", "TT_REGRESS_GSA_012", "TT_REGRESS_GSA_013", "TT_REGRESS_GSA_014"])
+    def test_regression_existing_book_tee_time_with_virtual_account(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow):
+        D.load(TC_ID)
+        PLAYERS = load_players(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._login(login_flow, home_flow)
+        self._open_standard_booking(tee_time_flow)
+        tee_time_flow.remove_promo(D.HOST_NAME)
+        tee_time_flow.choose_payment_method(D.PAYMENT_METHOD)
+        payment_information = tee_time_flow.get_payment_information_before_payment("0", PLAYERS, D.HOST_NAME)
+        tee_time_flow.pay_now()
+        tee_time_flow.simulate_gateway_payment(D.PAYMENT_METHOD, "Virtual account")
         self._verify_regression_booking(tee_time_flow, payment_callback_flow, PLAYERS, payment_information, D.PAYMENT_METHOD)

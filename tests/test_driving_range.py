@@ -405,7 +405,13 @@ class TestDrivingRange:
         booking_code = driving_range_flow.get_booking_code_after_payment()
         driving_range_flow.open_booking_details()
         driving_range_flow.verify_data_booking_details_without_credit_used(booking_code, D.PLAYER_NAME, D.BOOKING_DATE, D.BOOKING_START_TIME, D.BOOKING_END_TIME, D.NUMBER_OF_BAYS, payment_information, D.BAY_TYPE)
-        payment_callback_flow.verify_existing_payment_callback(booking_code)
+        
+    def _verify_regression_booking_business_id(self, driving_range_flow: DrivingRangeFlow, payment_callback_flow: PaymentCallbackFlow, payment_information, bussines_id):
+        driving_range_flow.verify_payment_success_driving_range(D.PLAYER_NAME, D.BOOKING_DATE, D.BOOKING_START_TIME, D.BOOKING_END_TIME, D.NUMBER_OF_BAYS, payment_information, D.BAY_TYPE)
+        booking_code = driving_range_flow.get_booking_code_after_payment()
+        driving_range_flow.open_booking_details()
+        driving_range_flow.verify_data_booking_details_without_credit_used(booking_code, D.PLAYER_NAME, D.BOOKING_DATE, D.BOOKING_START_TIME, D.BOOKING_END_TIME, D.NUMBER_OF_BAYS, payment_information, D.BAY_TYPE)
+        payment_callback_flow.verify_existing_payment_callback(booking_code=booking_code, business_id=bussines_id)
 
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression_existing
@@ -418,12 +424,12 @@ class TestDrivingRange:
         driving_range_flow.link_new_credit_card(D.PLAYER_NAME, D.CARD_NUMBER, D.CARD_EXPIRY, D.CARD_CVV, D.CARD_OTP)
         payment_information = driving_range_flow.get_payment_information_before_payment("0")
         driving_range_flow.pay_now_with_credit_card(D.CARD_CVV, D.CARD_OTP)
-        self._verify_regression_booking(driving_range_flow, payment_callback_flow, payment_information)
+        self._verify_regression_booking_business_id(driving_range_flow, payment_callback_flow, payment_information, "5f0401bcf8cc8d13feb11bb2")
 
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression_existing
-    @pytest.mark.parametrize("TC_ID", ["DR_REGRESS_GSA_002", "DR_REGRESS_GSA_003", "DR_REGRESS_GSA_004", "DR_REGRESS_GSA_005", "DR_REGRESS_GSA_006", "DR_REGRESS_GSA_007", "DR_REGRESS_GSA_008", "DR_REGRESS_GSA_009", "DR_REGRESS_GSA_010", "DR_REGRESS_GSA_011", "DR_REGRESS_GSA_012", "DR_REGRESS_GSA_013", "DR_REGRESS_GSA_014"])
-    def test_regression_existing_book_driving_range_by_payment_method(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow, payment_callback_flow: PaymentCallbackFlow):
+    @pytest.mark.parametrize("TC_ID", ["DR_REGRESS_GSA_003", "DR_REGRESS_GSA_004", "DR_REGRESS_GSA_005", "DR_REGRESS_GSA_006"])
+    def test_regression_existing_book_driving_range_with_ewallet(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow, payment_callback_flow: PaymentCallbackFlow):
         D.load(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
         self._login(login_flow, home_flow)
@@ -431,4 +437,32 @@ class TestDrivingRange:
         driving_range_flow.choose_payment_method(D.PAYMENT_METHOD)
         payment_information = driving_range_flow.get_payment_information_before_payment("0")
         driving_range_flow.pay_now()
-        self._verify_regression_booking(driving_range_flow, payment_callback_flow, payment_information)
+        self._verify_regression_booking_business_id(driving_range_flow, payment_callback_flow, payment_information, "5f0401bcf8cc8d13feb11bb2")
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["DR_REGRESS_GSA_002"])
+    def test_regression_existing_book_driving_range_with_qris(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow, payment_callback_flow: PaymentCallbackFlow):
+        D.load(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._login(login_flow, home_flow)
+        self._open_regression_booking(driving_range_flow)
+        driving_range_flow.choose_payment_method(D.PAYMENT_METHOD)
+        payment_information = driving_range_flow.get_payment_information_before_payment("0")
+        driving_range_flow.pay_now()
+        driving_range_flow.simulate_gateway_payment(D.PAYMENT_METHOD, "QRIS")
+        self._verify_regression_booking_business_id(driving_range_flow, payment_callback_flow, payment_information, "5f0401bcf8cc8d13feb11bb2")
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["DR_REGRESS_GSA_007", "DR_REGRESS_GSA_008", "DR_REGRESS_GSA_009", "DR_REGRESS_GSA_010", "DR_REGRESS_GSA_011", "DR_REGRESS_GSA_012", "DR_REGRESS_GSA_013", "DR_REGRESS_GSA_014"])
+    def test_regression_existing_book_driving_range_with_virtual_account(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow, payment_callback_flow: PaymentCallbackFlow):
+        D.load(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._login(login_flow, home_flow)
+        self._open_regression_booking(driving_range_flow)
+        driving_range_flow.choose_payment_method(D.PAYMENT_METHOD)
+        payment_information = driving_range_flow.get_payment_information_before_payment("0")
+        driving_range_flow.pay_now()
+        driving_range_flow.simulate_gateway_payment(D.PAYMENT_METHOD, "Virtual account")
+        self._verify_regression_booking_business_id(driving_range_flow, payment_callback_flow, payment_information, "5f0401bcf8cc8d13feb11bb2")

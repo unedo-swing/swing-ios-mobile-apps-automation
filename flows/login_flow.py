@@ -59,7 +59,7 @@ class LoginFlow(BaseFlow):
         otp = self.login.resolve_otp_code(otp, phone_number, f"+{dial_code}")
         self.verification_code.enter_code(otp)
 
-    def request_code(self, number=None):
+    def request_code(self, number):
         self.enter_phone_number(number)
         self.login.tap_continue()
         self.handle_system_alerts()

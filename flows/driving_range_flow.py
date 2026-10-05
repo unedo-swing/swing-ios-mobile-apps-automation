@@ -10,8 +10,8 @@ from pages.driving_range.bay_picker_page import BayPickerPage
 from pages.driving_range.booking_confirmation_page import BookingConfirmationPage
 from pages.driving_range.available_promos_page import AvailablePromosPage
 from pages.driving_range.add_promo_code_page import AddPromoCodePage
-from pages.driving_range.payment_method_page import PaymentMethodPage
-from pages.driving_range.payment_gateway_page import PaymentGatewayPage
+from pages.payment_method_page import PaymentMethodPage
+from pages.payment_gateway_page import PaymentGatewayPage
 from pages.driving_range.booking_success_page import BookingSuccessPage
 from pages.driving_range.dr_booking_details_page import DrBookingDetailsPage
 from pages.swing_credits.swing_credits_page import SwingCreditsPage
@@ -245,6 +245,7 @@ class DrivingRangeFlow(BaseFlow):
         self.credit_card.enter_cvv(card_cvv)
         if is_primary:
             self.credit_card.toggle_primary_method()
+        self.credit_card.tap_save_credit_card()
     
 
     def link_new_credit_card(self, card_name, card_number, card_expiry, card_cvv, otp):

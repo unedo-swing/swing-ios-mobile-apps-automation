@@ -36,6 +36,6 @@ class BookingConfirmationLocators:
     IMG_PAYMENT_METHOD = '//XCUIElementTypeImage[@name="{}"]'
     BTN_CHANGE_PAYMENT = '//XCUIElementTypeButton[@name="Change"]'
     EL_NO_PAYMENT_SELECTED = '//XCUIElementTypeOther[@name="No payment selected"]'
-    BTN_SELECT_PAYMENT = '//XCUIElementTypeButton[@name="Select payment"]'
+    BTN_SELECT_PAYMENT = '//XCUIElementTypeStaticText[contains(@name,"Price details")]/following-sibling::XCUIElementTypeOther[last()]/XCUIElementTypeButton'
     BTN_PAY_NOW = '//XCUIElementTypeButton[@name="Pay now"]'
     LBL_USED_CREDITS = '//XCUIElementTypeStaticText[starts-with(@name,"Swing Credits")]'

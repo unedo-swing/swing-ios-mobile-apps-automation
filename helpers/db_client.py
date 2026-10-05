@@ -2,10 +2,13 @@ import getpass
 import os
 import time
 from contextlib import contextmanager
+from typing import Any, Callable, cast
 
 from helpers.logger import get_logger
 
 log = get_logger("db")
+
+Row = dict[str, Any]
 
 
 class DbError(RuntimeError):
@@ -65,6 +68,7 @@ class DbClient:
 
     def _connect(self):
         import psycopg
+        from psycopg.conninfo import make_conninfo
         from psycopg.rows import dict_row
 
         params = {
@@ -83,7 +87,8 @@ class DbClient:
         last_error = None
         for attempt in range(1, self.retries + 1):
             try:
-                connection = psycopg.connect(row_factory=dict_row, **params)
+                connect: Any = psycopg.connect
+                connection = connect(make_conninfo(**params), row_factory=dict_row)
                 connection.read_only = not self.allow_write
                 return connection
             except psycopg.OperationalError as exc:
@@ -107,7 +112,7 @@ class DbClient:
         finally:
             connection.close()
 
-    def _run(self, sql, params=None, fetch=True):
+    def _run(self, sql, params=None, fetch=True) -> Any:
         started = time.time()
         with self.connection() as connection, connection.cursor() as cursor:
             try:
@@ -119,25 +124,25 @@ class DbClient:
         log.info(f"{self.label} {count} row(s) in {time.time() - started:.2f}s | {_clip(sql)} | {params!r}")
         return result
 
-    def query(self, sql, params=None):
-        return self._run(sql, params)
+    def query(self, sql, params=None) -> list[Row]:
+        return cast(list[Row], self._run(sql, params))
 
-    def query_one(self, sql, params=None):
+    def query_one(self, sql, params=None) -> Row | None:
         rows = self.query(sql, params)
         return rows[0] if rows else None
 
-    def query_value(self, sql, params=None, default=None):
+    def query_value(self, sql, params=None, default=None) -> Any:
         row = self.query_one(sql, params)
         return next(iter(row.values())) if row else default
 
-    def execute(self, sql, params=None):
+    def execute(self, sql, params=None) -> int:
         if not self.allow_write:
             raise DbError(f"{self.label} is read-only, set {self.label.upper()}_ALLOW_WRITE=true to change data")
-        return self._run(sql, params, fetch=False)
+        return cast(int, self._run(sql, params, fetch=False))
 
-    def wait_for(self, sql, params=None, until=bool, timeout=30, interval=2):
+    def wait_for(self, sql, params=None, until: Callable[[list[Row]], Any] = bool,
+                 timeout: float = 30, interval: float = 2) -> list[Row]:
         deadline = time.time() + timeout
-        rows = []
         while True:
             rows = self.query(sql, params)
             if until(rows):
@@ -147,5 +152,5 @@ class DbClient:
                               f" | sql: {_clip(sql)}")
             time.sleep(interval)
 
-    def ping(self):
+    def ping(self) -> bool:
         return self.query_value("select 1") == 1

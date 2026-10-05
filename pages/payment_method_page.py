@@ -1,4 +1,4 @@
-from locators.driving_range.payment_method_locators import PaymentMethodLocators as L
+from locators.payment_method_locators import PaymentMethodLocators as L
 from pages.base_page import BasePage
 
 

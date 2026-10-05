@@ -9,8 +9,8 @@ from pages.event.player_details_page import PlayerDetailsPage
 from pages.event.add_player_page import EventAddPlayerPage
 from pages.country_picker_page import CountryPickerPage
 from pages.event.group_registration_info_page import GroupRegistrationInfoPage
-from pages.driving_range.payment_method_page import PaymentMethodPage
-from pages.driving_range.payment_gateway_page import PaymentGatewayPage
+from pages.payment_method_page import PaymentMethodPage
+from pages.payment_gateway_page import PaymentGatewayPage
 from pages.event.registration_success_page import RegistrationSuccessPage
 from pages.event.registration_details_page import RegistrationDetailsPage
 from pages.event.registration_summary_page import RegistrationSummaryPage
