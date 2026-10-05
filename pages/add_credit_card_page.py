@@ -31,6 +31,7 @@ class AddCreditCardPage(BasePage):
     def enter_cvv(self, cvv):
         self.capture_step("Enter CVV", cvv)
         self.type(L.INPUT_CVV, cvv)
+        self.hide_keyboard()
 
     def set_primary_method(self, on=True):
         self.capture_step("Set as primary method", on)

@@ -17,11 +17,12 @@ class CardLinkedSuccessPage(BasePage):
 
     def tap_close(self):
         self.capture_step("tap_close")
+        self.wait(2)
         self.click(L.BTN_CLOSE)
 
-    def tap_back(self):
+    def tap_refresh(self):
         self.capture_step("tap_back")
-        self.click(L.BTN_BACK)
+        self.click(L.BTN_REFRESH)
 
     def tap_go_to_home(self):
         self.capture_step("tap_go_to_home")

@@ -19,6 +19,14 @@ class PurchaseAuthenticationPage(BasePage):
         self.capture_step("enter_otp_code", code)
         self.type(L.INPUT_OTP_CODE, code)
 
+    def hide_otp_keyboard(self):
+        self.capture_step("hide_otp_keyboard")
+        self.hide_keyboard()
+
+    def double_tap_middle(self):
+        self.capture_step("double_tap_middle")
+        self.double_tap_center()
+
     def clear_otp_code(self):
         self.capture_step("clear_otp_code")
         self.clear(L.INPUT_OTP_CODE)

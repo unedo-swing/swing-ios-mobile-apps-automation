@@ -18,6 +18,12 @@ class ConfirmCreditCardPage(BasePage):
     def enter_cvv(self, cvv):
         self.capture_step("enter_cvv", cvv)
         self.type(L.INPUT_CVV, cvv)
+        self.hide_keyboard()
+    
+    def enter_cvv_card(self, cvv):
+        self.capture_step("enter_cvv", cvv)
+        self.type(L.INPUT_CVV_BY_CARD, cvv)
+        self.hide_keyboard()
 
     def clear_cvv(self):
         self.capture_step("clear_cvv")

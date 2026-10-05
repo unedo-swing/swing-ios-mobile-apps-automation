@@ -552,7 +552,9 @@ class TeeTimeFlow(BaseFlow):
     def authenticate_card(self, otp):
         self.authentication.verify_screen()
         self.authentication.enter_otp_code(otp)
-        self.authentication.tap_submit()
+        self.authentication.hide_otp_keyboard()
+        # self.authentication.double_tap_middle()
+        # self.authentication.tap_submit()
 
     def pay_now_with_credit_card(self, card_cvv, otp):
         self.confirm.tap_pay_now()

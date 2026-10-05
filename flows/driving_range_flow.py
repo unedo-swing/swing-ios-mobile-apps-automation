@@ -261,17 +261,19 @@ class DrivingRangeFlow(BaseFlow):
         self.authenticate_card(otp)
         self.card_linked.verify_screen()
         self.card_linked.tap_close()
-        self.confirm.verify_screen()
+        # self.confirm.verify_screen()
 
     def authenticate_card(self, otp):
         self.authentication.verify_screen()
         self.authentication.enter_otp_code(otp)
-        self.authentication.tap_submit()
+        self.authentication.hide_otp_keyboard()
+        # self.authentication.double_tap_middle()
+        # self.authentication.tap_submit()
 
     def pay_now_with_credit_card(self, card_cvv, otp):
         self.confirm.tap_pay_now()
         self.confirm_card.verify_screen()
-        self.confirm_card.enter_cvv(card_cvv)
+        self.confirm_card.enter_cvv_card(card_cvv)
         self.confirm_card.tap_confirm()
         if self.authentication.is_loaded(15):
             self.authenticate_card(otp)

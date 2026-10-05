@@ -78,6 +78,8 @@ def tap_return(driver):
 
 def clear_field(driver, element):
     element.clear()
+    if element.tag_name == "XCUIElementTypeSecureTextField":
+        return
     if element.get_attribute("value"):
         element.click()
         current = element.get_attribute("value") or ""

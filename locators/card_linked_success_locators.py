@@ -1,7 +1,7 @@
 class CardLinkedSuccessLocators:
     EL_HEADER_VISA = '//XCUIElementTypeOther[@name="VISA"]'
-    BTN_BACK = '//XCUIElementTypeOther[@name="VISA"]/preceding-sibling::XCUIElementTypeButton[1]'
-    BTN_CLOSE = '//XCUIElementTypeOther[@name="VISA"]/following-sibling::XCUIElementTypeButton[1]'
+    BTN_CLOSE = '//XCUIElementTypeOther[@name="VISA"]/preceding-sibling::XCUIElementTypeButton[1]'
+    BTN_REFRESH = '//XCUIElementTypeOther[@name="VISA"]/following-sibling::XCUIElementTypeButton[1]'
     EL_SUCCESS_PAGE = '//XCUIElementTypeOther[@name="Swing - Success"]'
     IMG_SUCCESS = '//XCUIElementTypeImage[@name="success"]'
     TXT_SUCCESS_TITLE = '//XCUIElementTypeStaticText[@name="Card successfully linked"]'

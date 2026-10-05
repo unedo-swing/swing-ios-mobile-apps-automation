@@ -1,4 +1,4 @@
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, WebDriverException
 
 from config.settings import settings
 from helpers import alerts, device, gestures, keyboard, media, waits
@@ -119,6 +119,12 @@ class BasePage:
         gestures.double_tap(self.driver, self.find_visible(locator))
         return self
 
+    def double_tap_center(self):
+        width, height = gestures.screen_size(self.driver)
+        reporter.action("double tap", "screen center", f"{width // 2},{height // 2}")
+        gestures.double_tap(self.driver, x=width // 2, y=height // 2)
+        return self
+
     def long_press(self, locator, duration=2.0):
         reporter.action("long press", locator)
         gestures.long_press(self.driver, self.find_visible(locator), duration=duration)
@@ -127,11 +133,18 @@ class BasePage:
     def type(self, locator, text, clear=True, hide_keyboard=False, timeout=None, mask=False,
              dismiss_with=None):
         reporter.action("type", locator, "***" if mask else text)
-        element = self.find_visible(locator, timeout)
-        element.click()
-        if clear:
-            keyboard.clear_field(self.driver, element)
-        element.send_keys(str(text))
+        self.find_visible(locator, timeout).click()
+        for attempt in range(2):
+            try:
+                element = self.find_visible(locator, timeout)
+                if clear:
+                    keyboard.clear_field(self.driver, element)
+                element.send_keys(str(text))
+                break
+            except StaleElementReferenceException:
+                if attempt:
+                    raise
+                self.log.info(f"field was redrawn after the tap, finding it again: {locator}")
         if hide_keyboard:
             keyboard.hide(self.driver, outside=dismiss_with)
         return self
