@@ -11,6 +11,10 @@ from pages.country_picker_page import CountryPickerPage
 from pages.event.group_registration_info_page import GroupRegistrationInfoPage
 from pages.payment_method_page import PaymentMethodPage
 from pages.payment_gateway_page import PaymentGatewayPage
+from pages.add_credit_card_page import AddCreditCardPage
+from pages.card_linked_success_page import CardLinkedSuccessPage
+from pages.confirm_credit_card_page import ConfirmCreditCardPage
+from pages.purchase_authentication_page import PurchaseAuthenticationPage
 from pages.event.registration_success_page import RegistrationSuccessPage
 from pages.event.registration_details_page import RegistrationDetailsPage
 from pages.event.registration_summary_page import RegistrationSummaryPage
@@ -36,6 +40,10 @@ class EventFlow(BaseFlow):
         self.group_info = self.page(GroupRegistrationInfoPage)
         self.payment = self.page(PaymentMethodPage)
         self.gateway = self.page(PaymentGatewayPage)
+        self.credit_card = self.page(AddCreditCardPage)
+        self.authentication = self.page(PurchaseAuthenticationPage)
+        self.card_linked = self.page(CardLinkedSuccessPage)
+        self.confirm_card = self.page(ConfirmCreditCardPage)
         self.success = self.page(RegistrationSuccessPage)
         self.registration = self.page(RegistrationDetailsPage)
         self.summary = self.page(RegistrationSummaryPage)
@@ -188,16 +196,40 @@ class EventFlow(BaseFlow):
             self.search_friend(player.get("search_keyword") or player.get("username"))
             self.select_friend(player.get("username"))
 
-    def invite_players(self, players):
-        for player in players or []:
-            if str(player.get("add_method", "")).lower() not in ("", "host"):
-                self.invite_player(player)
+    def host_players(self, players):
+        return [player for player in players or []
+                if isinstance(player, dict) and str(player.get("add_method", "")).lower() == "host"]
 
-    def fill_players_details(self, player, answer=""):
-        self.open_player_details(player["player"])
+    def invitee_players(self, players):
+        return [player for player in players or []
+                if isinstance(player, dict) and str(player.get("add_method", "")).lower() not in ("", "host")]
+
+    def invite_players(self, players):
+        for player in self.invitee_players(players):
+            self.invite_player(player)
+
+    def verify_player_added(self, player):
+        assert self.confirm.has_player(player), f"{player} was not added to the registration"
+
+    def fill_player_details(self, player, answer=""):
+        self.open_player_details(player)
         if answer:
             self.answer_question(answer)
         self.save_player_details()
+
+    def fill_host_details(self, players, answer=""):
+        for host in self.host_players(players):
+            self.fill_player_details(host["player"], answer)
+
+    def invite_players_with_details(self, players, answer=""):
+        for player in self.invitee_players(players):
+            self.invite_player(player)
+            self.verify_player_added(player["player"])
+            self.fill_player_details(player["player"], answer)
+
+    def fill_players_details(self, players, answer=""):
+        for player in self.player_names(players):
+            self.fill_player_details(player, answer)
 
     def open_promos(self, player):
         self.confirm.open_promos(player)
@@ -226,6 +258,36 @@ class EventFlow(BaseFlow):
 
     def pay_now(self):
         self.confirm.tap_pay_now()
+        self.gateway.tap_proceed_to_pay()
+
+    def link_new_credit_card(self, card_name, card_number, card_expiry, card_cvv, otp):
+        self.open_payment_method()
+        self.payment.add_credit_card()
+        self.credit_card.verify_screen()
+        self.credit_card.enter_cardholder_name(card_name)
+        self.credit_card.enter_card_number(card_number)
+        self.credit_card.enter_expiry_date(card_expiry)
+        self.credit_card.enter_cvv(card_cvv)
+        self.credit_card.tap_save_credit_card()
+        self.authenticate_card(otp)
+        self.card_linked.verify_screen()
+        self.card_linked.tap_close()
+        self.confirm.verify_screen()
+
+    def authenticate_card(self, otp):
+        self.authentication.verify_screen()
+        self.authentication.enter_otp_code(otp)
+        self.authentication.hide_otp_keyboard()
+        # self.authentication.double_tap_middle()
+        # self.authentication.tap_submit()
+
+    def pay_now_with_credit_card(self, card_cvv, otp):
+        self.confirm.tap_pay_now()
+        self.confirm_card.verify_screen()
+        self.confirm_card.enter_cvv(card_cvv)
+        self.confirm_card.tap_confirm()
+        if self.authentication.is_loaded(15):
+            self.authenticate_card(otp)
 
     def proceed_to_pay(self):
         self.gateway.verify_screen()
@@ -261,7 +323,8 @@ class EventFlow(BaseFlow):
         for player in self.player_names(players):
             assert self.confirm.has_player(player), f"{player} not in the registration"
 
-    def verify_registration_information(self, date, starting_time, venue, registration_type, players):
+    def verify_registration_information(self, date, starting_time, venue, registration_type, players,
+                                        total_players=None):
         self.confirm.verify_screen()
         assert date in self.confirm.date_text(), (
             f"date does not match: expected {date}, found {self.confirm.date_text()}")
@@ -274,8 +337,9 @@ class EventFlow(BaseFlow):
             assert registration_type in self.confirm.registration_type_text(), (
                 f"registration type does not match: expected {registration_type}, "
                 f"found {self.confirm.registration_type_text()}")
-        assert str(self.player_total(players)) in self.confirm.players_text(), (
-            f"player count does not match: expected {self.player_total(players)}, "
+        expected = str(total_players or self.player_total(players))
+        assert expected in self.confirm.players_text(), (
+            f"player count does not match: expected {expected}, "
             f"found {self.confirm.players_text()}")
 
     def verify_players_promos(self, players):
@@ -351,7 +415,7 @@ class EventFlow(BaseFlow):
         self.success.verify_screen()
 
     def verify_payment_success_event(self, date, starting_time, payment_information, players,
-                                     venue="", payment_method=""):
+                                     venue="", payment_method="", total_players=None):
         self.success.verify_screen()
         assert self.success.registration_code_text(), "registration code not shown"
         assert date in self.success.date_text(), (
@@ -359,8 +423,9 @@ class EventFlow(BaseFlow):
         assert starting_time in self.success.starting_time_text(), (
             f"starting time does not match: expected {starting_time}, "
             f"found {self.success.starting_time_text()}")
-        assert str(self.player_total(players)) in self.success.players_text(), ( # type: ignore
-            f"player count does not match: expected {self.player_total(players)}, "
+        expected = str(total_players or self.player_total(players))
+        assert expected in self.success.players_text(), (  # type: ignore
+            f"player count does not match: expected {expected}, "
             f"found {self.success.players_text()}")
         assert amounts.to_number(payment_information["total_payment"]) == amounts.to_number(
             self.success.total_text()), (

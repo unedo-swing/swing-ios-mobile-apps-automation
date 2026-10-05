@@ -10,6 +10,7 @@ from test_data.player_data import load_players
 from test_data.tee_time_test_data import TeeTimeTestData as D
 
 
+@pytest.mark.device(2)
 class TestTeeTime:
 
     def _login(self, login_flow: LoginFlow, home_flow: HomeFlow):

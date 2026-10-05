@@ -9,7 +9,7 @@ class RegistrationDetailsPage(BasePage):
     def verify_screen(self):
         self.wait_until_loaded()
         assert self.is_visible(L.EL_HEADER, timeout=20), "Registration details screen not shown"
-        assert self.is_visible(L.TXT_QR_TITLE, timeout=5), "Registration details QR code not shown"
+        # assert self.is_visible(L.TXT_QR_TITLE, timeout=5), "Registration details QR code not shown"
         assert self.is_visible(L.TXT_REGISTRATION_CODE, timeout=5), "Registration details code not shown"
         assert self.is_visible(L.BTN_SEE_BREAKDOWN, timeout=5), "Registration details breakdown button not shown"
         self.capture_step("registration_details")

@@ -9,6 +9,7 @@ from flows.login_flow import LoginFlow
 from flows.payment_callback_flow import PaymentCallbackFlow
 
 
+@pytest.mark.device(1)
 class TestDrivingRange:
 
     def _login(self, login_flow: LoginFlow, home_flow: HomeFlow):

@@ -27,6 +27,12 @@ class EventTestData(ExcelData):
     PROMO_NAME = ""
     PROMO_CODE = ""
     PAYMENT_METHOD = "DANA"
+    PAYMENT_TYPE = ""
+    CARD_NAME = "QA Auto Mation"
+    CARD_NUMBER = ""
+    CARD_EXPIRY = ""
+    CARD_CVV = ""
+    CARD_OTP = ""
     
     TC_NAME = ""
     

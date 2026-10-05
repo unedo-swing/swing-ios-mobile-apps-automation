@@ -5,6 +5,7 @@ from flows.event_package_flow import EventPackageFlow
 from flows.player_details_flow import PlayerDetailsFlow
 from flows.home_flow import HomeFlow
 from flows.login_flow import LoginFlow
+from flows.payment_callback_flow import PaymentCallbackFlow
 from helpers.pdf_report import init_pdf
 from test_data.event_test_data import EventTestData as D
 from test_data.player_data import load_players
@@ -110,7 +111,7 @@ class TestEvent:
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
         # self._login(login_flow, home_flow)
         self._open_standard_registration_single_price(event_flow)
-        event_flow.fill_players_details(PLAYERS, D.QUESTION_ANSWER)
+        event_flow.fill_host_details(PLAYERS, D.QUESTION_ANSWER)
         event_flow.verify_registration_information(D.EVENT_DATE, D.STARTING_TIME, D.VENUE, D.REGISTRATION_METHOD, PLAYERS)
         event_flow.choose_payment_method(D.PAYMENT_METHOD)
         payment_information = event_flow.get_payment_information_before_payment("0")
@@ -129,8 +130,8 @@ class TestEvent:
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
         self._login(login_flow, home_flow)
         self._open_standard_registration_single_price(event_flow)
-        event_flow.invite_players(PLAYERS)
-        event_flow.fill_players_details(PLAYERS, D.QUESTION_ANSWER)
+        event_flow.fill_host_details(PLAYERS, D.QUESTION_ANSWER)
+        event_flow.invite_players_with_details(PLAYERS, D.QUESTION_ANSWER)
         event_flow.apply_player_promos(PLAYERS)
         event_flow.verify_registration_confirmation_players(PLAYERS)
         event_flow.verify_players_promos(PLAYERS)
@@ -172,9 +173,76 @@ class TestEvent:
         event_flow.choose_payment_method(D.PAYMENT_METHOD)
         payment_information = event_flow.get_payment_information_before_payment("0")
         event_flow.pay_now()
-        event_flow.proceed_to_pay()
         registration_code = event_flow.get_registration_code_after_payment()
         event_flow.verify_payment_success_event(D.EVENT_DATE, D.STARTING_TIME, payment_information,
                                                 PLAYERS, D.VENUE, D.PAYMENT_METHOD)
         event_flow.open_registration_details()
         event_flow.verify_registration_details(registration_code, D.EVENT_DATE, D.STARTING_TIME, D.VENUE)
+
+
+    def _open_regression_registration(self, login_flow: LoginFlow, home_flow: HomeFlow, event_flow: EventFlow, PLAYERS):
+        self._login(login_flow, home_flow)
+        self._open_standard_registration_single_price(event_flow)
+        event_flow.invite_players_with_details(PLAYERS, D.QUESTION_ANSWER)
+        event_flow.verify_registration_information(D.EVENT_DATE, D.STARTING_TIME, D.VENUE, D.REGISTRATION_METHOD, PLAYERS, D.TOTAL_PLAYERS)
+
+    def _verify_regression_registration(self, event_flow: EventFlow, payment_callback_flow: PaymentCallbackFlow, PLAYERS, payment_information, payment_method=""):
+        registration_code = event_flow.get_registration_code_after_payment()
+        event_flow.verify_payment_success_event(D.EVENT_DATE, D.STARTING_TIME, payment_information, PLAYERS, D.VENUE, payment_method, D.TOTAL_PLAYERS)
+        event_flow.open_registration_details()
+        event_flow.verify_registration_details(registration_code, D.EVENT_DATE, D.STARTING_TIME, D.VENUE)
+        payment_callback_flow.verify_existing_payment_callback(registration_code)
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["EVENT_REGRESS_GSA_001"])
+    def test_regression_existing_register_event_with_credit_card(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, event_flow: EventFlow, payment_callback_flow: PaymentCallbackFlow):
+        D.load(TC_ID)
+        PLAYERS = load_players(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._open_regression_registration(login_flow, home_flow, event_flow, PLAYERS)
+        event_flow.link_new_credit_card(D.CARD_NAME, D.CARD_NUMBER, D.CARD_EXPIRY, D.CARD_CVV, D.CARD_OTP)
+        payment_information = event_flow.get_payment_information_before_payment("0")
+        event_flow.pay_now_with_credit_card(D.CARD_CVV, D.CARD_OTP)
+        self._verify_regression_registration(event_flow, payment_callback_flow, PLAYERS, payment_information)
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["EVENT_REGRESS_GSA_003", "EVENT_REGRESS_GSA_004", "EVENT_REGRESS_GSA_005", "EVENT_REGRESS_GSA_006"])
+    def test_regression_existing_register_event_with_ewallet(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, event_flow: EventFlow, payment_callback_flow: PaymentCallbackFlow):
+        D.load(TC_ID)
+        PLAYERS = load_players(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._open_regression_registration(login_flow, home_flow, event_flow, PLAYERS)
+        event_flow.choose_payment_method(D.PAYMENT_METHOD)
+        payment_information = event_flow.get_payment_information_before_payment("0")
+        event_flow.pay_now()
+        self._verify_regression_registration(event_flow, payment_callback_flow, PLAYERS, payment_information, D.PAYMENT_METHOD)
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["EVENT_REGRESS_GSA_002"])
+    def test_regression_existing_register_event_with_qris(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, event_flow: EventFlow, payment_callback_flow: PaymentCallbackFlow):
+        D.load(TC_ID)
+        PLAYERS = load_players(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._open_regression_registration(login_flow, home_flow, event_flow, PLAYERS)
+        event_flow.choose_payment_method(D.PAYMENT_METHOD)
+        payment_information = event_flow.get_payment_information_before_payment("0")
+        event_flow.pay_now()
+        event_flow.simulate_gateway_payment(D.PAYMENT_METHOD, "QRIS")
+        self._verify_regression_registration(event_flow, payment_callback_flow, PLAYERS, payment_information, D.PAYMENT_METHOD)
+
+    @pytest.mark.app_reset("clear")
+    @pytest.mark.regression_existing
+    @pytest.mark.parametrize("TC_ID", ["EVENT_REGRESS_GSA_007", "EVENT_REGRESS_GSA_008", "EVENT_REGRESS_GSA_009", "EVENT_REGRESS_GSA_010", "EVENT_REGRESS_GSA_011", "EVENT_REGRESS_GSA_012", "EVENT_REGRESS_GSA_013", "EVENT_REGRESS_GSA_014"])
+    def test_regression_existing_register_event_with_virtual_account(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, event_flow: EventFlow, payment_callback_flow: PaymentCallbackFlow):
+        D.load(TC_ID)
+        PLAYERS = load_players(TC_ID)
+        pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
+        self._open_regression_registration(login_flow, home_flow, event_flow, PLAYERS)
+        event_flow.choose_payment_method(D.PAYMENT_METHOD)
+        payment_information = event_flow.get_payment_information_before_payment("0")
+        event_flow.pay_now()
+        event_flow.simulate_gateway_payment(D.PAYMENT_METHOD, "Virtual account")
+        self._verify_regression_registration(event_flow, payment_callback_flow, PLAYERS, payment_information, D.PAYMENT_METHOD)

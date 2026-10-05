@@ -15,6 +15,7 @@ class LoginPage(BasePage):
         assert self.is_visible(L.PICKER_COUNTRY, timeout=5), "Country selector not shown"
         assert self.is_visible(L.BTN_CONTINUE, timeout=5), "Continue button not shown"
         self.capture_step("Verify login page")
+        self.wait(2)
         return self
 
     def select_country(self):
