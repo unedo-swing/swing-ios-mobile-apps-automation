@@ -119,6 +119,20 @@ class BasePage:
         gestures.double_tap(self.driver, self.find_visible(locator))
         return self
 
+    def tap_row_in(self, locator, text, header_lines=1, lines_per_row=3, x_ratio=0.5, timeout=None):
+        element = self.find_visible(locator, timeout)
+        lines = (element.get_attribute("label") or element.text or "").split("\n")
+        rows = max((len(lines) - header_lines) // lines_per_row, 1)
+        row = next((index for index in range(rows)
+                    if any(text in line for line in
+                           lines[header_lines + index * lines_per_row:header_lines + (index + 1) * lines_per_row])), 0)
+        rect = element.rect
+        x = int(rect["x"] + rect["width"] * x_ratio)
+        y = int(rect["y"] + rect["height"] * (row + 1.5) / (rows + 1))
+        reporter.action("tap row", locator, f"{text} = row {row + 1} of {rows} at {x},{y}")
+        gestures.tap(self.driver, x, y)
+        return self
+
     def double_tap_center(self):
         width, height = gestures.screen_size(self.driver)
         reporter.action("double tap", "screen center", f"{width // 2},{height // 2}")

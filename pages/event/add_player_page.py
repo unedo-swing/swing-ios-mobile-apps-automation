@@ -5,6 +5,7 @@ from pages.base_page import BasePage
 class EventAddPlayerPage(BasePage):
     ROOT_LOCATOR = L.EL_TITLE
     PAGE_NAME = "EventAddPlayerPage"
+    AVATAR_X_RATIO = 0.12
 
     def verify_screen(self):
         self.wait_until_loaded()
@@ -28,7 +29,7 @@ class EventAddPlayerPage(BasePage):
 
     def select_friend(self, username):
         self.capture_step("select_friend")
-        self.click(L.TXT_RESULT_BY_TEXT.format(username))
+        self.tap_row_in(L.TXT_RESULT_BY_TEXT.format(username), username, x_ratio=self.AVATAR_X_RATIO)
 
     def enter_first_name(self, text):
         self.capture_step("enter_first_name")
