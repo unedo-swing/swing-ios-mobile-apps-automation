@@ -1,0 +1,106 @@
+from flows.base_flow import BaseFlow
+from pages.multisport.sport_option_page import SportOptionPage
+from pages.multisport.billiard_page import BilliardPage
+from pages.multisport.all_venue_list_page import AllVenueListPage
+from pages.multisport.venue_detail_page import VenueDetailPage
+from pages.multisport.select_schedule_page import SelectSchedulePage
+from pages.multisport.booking_confirmation_page import BookingConfirmationPage
+from pages.multisport.payment_method_page import PaymentMethodPage
+from pages.multisport.bottomsheet_add_player_page import BottomsheetAddPlayerPage
+from pages.multisport.order_page import OrderPage
+from pages.multisport.additional_items_page import AdditionalItemsPage
+
+
+class MultisportFlow(BaseFlow):
+    FLOW_NAME = "MultisportFlow"
+
+    def __init__(self, driver, reporter=None):
+        super().__init__(driver, reporter)
+        self.sport_option = self.page(SportOptionPage)
+        self.billiard_page = self.page(BilliardPage)
+        self.all_venue_list = self.page(AllVenueListPage)
+        self.venue_detail = self.page(VenueDetailPage)
+        self.select_schedule = self.page(SelectSchedulePage)
+        self.booking_confirmation = self.page(BookingConfirmationPage)
+        self.payment_method = self.page(PaymentMethodPage)
+        self.add_player = self.page(BottomsheetAddPlayerPage)
+        self.order = self.page(OrderPage)
+        self.additional_items = self.page(AdditionalItemsPage)
+
+    # -------- initiation from Home --------
+    def open_multisport_sport(self):
+        """From the app bar on Home, enter the sport option page."""
+        self.sport_option.navigate_from_home()
+        self.sport_option.verify_screen()
+
+    def select_sport(self, sport_name: str):
+        self.sport_option.choose_sport(sport_name)
+        self.billiard_page.verify_screen()
+
+    def view_all_venue(self):
+        self.billiard_page.go_to_all_venue()
+        self.all_venue_list.verify_screen()
+
+    def select_venue(self, venue_name: str):
+        self.all_venue_list.choose_venue(venue_name)
+        self.venue_detail.verify_screen(venue_name)
+
+    def book_venue(self):
+        self.venue_detail.book_venue()
+        self.select_schedule.verify_screen()
+
+    def select_schedule_flow(self, schedule_title: str, how_many: int):
+        self.select_schedule.navigate_to_next_day_until_gone()
+        self.select_schedule.select_schedule(schedule_title, how_many)
+
+    def confirm_schedule(self):
+        self.select_schedule.confirm_schedules()
+
+    def payment_method_flow(self, method_name: str):
+        self.booking_confirmation.open_payment_method()
+        self.payment_method.verify_screen()
+        self.payment_method.select_payment_method(method_name)
+
+    def add_player_by_name(self, name: str):
+        self.booking_confirmation.click_add_player()
+        self.add_player.verify_screen()
+        self.add_player.search_friend(name)
+        self.add_player.select_player(name)
+        self.add_player.verify_player_added(name)
+        self.booking_confirmation.verify_screen()
+        self.booking_confirmation.verify_total_player()
+
+    def remove_player(self):
+        self.booking_confirmation.delete_player()
+
+    # -------- additional items --------
+    def add_additional_items_flow(self, items: list[str]):
+        if not items:
+            return
+        self.additional_items.verify_screen()
+        for item_name in items:
+            self.additional_items.pick_item(item_name)
+            self.additional_items.add_item()
+            self.additional_items.save_items()
+            self.additional_items.verify_selected_additional_items(item_name)
+
+    def confirm_additional_item(self):
+        self.additional_items.confirm_items()
+        self.booking_confirmation.verify_screen()
+
+    def remove_additional_item(self, items: list[str]):
+        if not items:
+            return
+        self.additional_items.verify_screen()
+        for item_name in items:
+            self.additional_items.edit_item(item_name)
+            self.additional_items.remove_item()
+            self.additional_items.save_items()
+            self.additional_items.verify_removed_additional_items(item_name)
+            
+
+    def pay_now(self):
+        self.booking_confirmation.tap_pay_now()
+
+    def finish(self):
+        self.order.tap_finish()

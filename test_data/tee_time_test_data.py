@@ -43,3 +43,6 @@ class TeeTimeTestData(ExcelData):
     PLAYER_OTP = ""
     
     SPORT_TYPE = "Golf"
+
+    LOGIN_REGION = ""
+    REGION = "ID"

@@ -59,6 +59,15 @@ class LoginFlow(BaseFlow):
         otp = self.login.resolve_otp_code(otp, phone_number, f"+{dial_code}")
         self.verification_code.enter_code(otp)
 
+    def login_with_otp(self, country: str, phone: str, method: str, otp: str = ""):
+        self.open_login()
+        self.choose_country(country)
+        self.enter_phone_number(phone)
+        self.continue_log_in()
+        self.choose_verification_method(method)
+        self.verify_page_code_otp()
+        self.enter_otp_code(otp, country, phone)
+
     def request_code(self, number):
         self.enter_phone_number(number)
         self.login.tap_continue()

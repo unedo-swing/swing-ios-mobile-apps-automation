@@ -30,7 +30,15 @@ class DrivingRangeTestData(ExcelData):
     CARD_EXPIRY = ""
     CARD_CVV = ""
     CARD_OTP = ""
+
+    RESCHEDULE_DAY = ""
+    RESCHEDULE_TIME = ""
+    RESCHEDULE_REASON = "Wrong date or time booked"
+    RESCHEDULE_DURATION = "60 minutes"
     
     TC_NAME = ""
     
     MEMBER_TYPE = "swing-pass"
+
+    LOGIN_REGION = ""
+    REGION = "ID"

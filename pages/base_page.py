@@ -133,6 +133,15 @@ class BasePage:
         gestures.tap(self.driver, x, y)
         return self
 
+    def slide_right(self, handle_locator, track_locator, duration=1.0, timeout=None):
+        handle = self.find_visible(handle_locator, timeout).rect
+        track = self.find_visible(track_locator, timeout).rect
+        start_x, y = handle["x"] + handle["width"] // 2, handle["y"] + handle["height"] // 2
+        end_x = track["x"] + track["width"] - handle["width"] // 2
+        reporter.action("slide", handle_locator, f"{start_x},{y} -> {end_x},{y}")
+        gestures.drag_coordinates(self.driver, start_x, y, end_x, y, duration)
+        return self
+
     def double_tap_center(self):
         width, height = gestures.screen_size(self.driver)
         reporter.action("double tap", "screen center", f"{width // 2},{height // 2}")

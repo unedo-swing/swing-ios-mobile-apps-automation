@@ -54,6 +54,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "group_booking: needs the host device plus the PLAYER_<n> devices")
     _device_html_report(config)
     config.addinivalue_line("markers", "regression_existing: end to end booking per payment method on existing accounts")
+    config.addinivalue_line("markers", "cross_country: login in one region, switch region on home, then book")
     config.addinivalue_line("markers", "device(n, app=None): run on the DEVICE_<n> block of the env file, optionally with a specific .app build")
     _validate_workers(config)
 

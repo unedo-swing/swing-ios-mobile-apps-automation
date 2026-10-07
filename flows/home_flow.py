@@ -77,3 +77,21 @@ class HomeFlow(BaseFlow):
     def open_sport_option(self):
         self.home.open_sport_option()
         self.sport.verify_screen()
+
+    REGION_COUNTRIES = {"ID": "Indonesia", "MY": "Malaysia"}
+
+    def open_region_picker(self):
+        self.home.open_region_picker()
+        assert self.home.has_region_picker(), "Select country sheet not shown"
+
+    def select_region(self, region):
+        code = str(region).strip().upper()
+        self.open_region_picker()
+        self.home.select_region_country(self.REGION_COUNTRIES.get(code, region))
+        self.verify_region(code)
+
+    def verify_region(self, region):
+        self.home.wait_until_loaded()
+        code = str(region).strip().upper()
+        actual = (self.home.selected_country() or "").strip().upper()
+        assert actual == code, f"home region is {actual!r} after choosing {code!r}"

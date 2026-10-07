@@ -35,6 +35,21 @@ class HomePage(BasePage):
     def selected_sport(self):
         return self.label_of(L.EL_SPORT_BUTTON)
 
+    def open_region_picker(self):
+        self.capture_step("open_region_picker")
+        self.click(L.EL_COUNTRY_BUTTON)
+
+    def has_region_picker(self, timeout=20):
+        return self.is_visible(L.TXT_SELECT_COUNTRY, timeout)
+
+    def select_region_country(self, country):
+        self.capture_step("select_region_country", country)
+        self.scroll_and_click(L.IMG_REGION_BY_COUNTRY.format(country))
+
+    def close_region_picker(self):
+        self.capture_step("close_region_picker")
+        self.click(L.BTN_CLOSE_SELECT_COUNTRY)
+
     def selected_country(self):
         return self.label_of(L.EL_COUNTRY_BUTTON)
 
@@ -75,6 +90,24 @@ class HomePage(BasePage):
     def open_membership(self):
         self.capture_step("open_membership")
         self.click(L.EL_MEMBERSHIP_CARD)
+
+    def open_join_swing_pass(self):
+        self.capture_step("open_join_swing_pass")
+        self.scroll_and_click(L.TXT_JOIN_SWING_PASS)
+
+    def open_swing_pass(self):
+        self.capture_step("open_swing_pass")
+        self.scroll_and_click(L.card_swing_pass)
+
+    def tap_join_swing_pass(self):
+        self.capture_step("tap_join_swing_pass")
+        self.scroll_and_click(L.TXT_JOIN_SWING_PASS)
+
+    def has_swing_pass(self, timeout=5):
+        return self.is_visible(L.card_swing_pass, timeout)
+
+    def has_join_swing_pass(self, timeout=5):
+        return self.is_visible(L.TXT_JOIN_SWING_PASS, timeout)
 
     def open_credits(self):
         self.capture_step("Open credits")

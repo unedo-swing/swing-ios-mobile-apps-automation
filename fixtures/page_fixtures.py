@@ -1,5 +1,6 @@
 import pytest
 
+from pages.swing_pass.promo_code_page import SwingPassPromoCodePage
 from pages.tee_time.group_booking_intro_page import GroupBookingIntroPage
 from pages.tee_time.invite_player_page import InvitePlayerPage
 from pages.activity.activity_page import ActivityPage
@@ -480,3 +481,11 @@ def group_booking_intro_page(driver) -> GroupBookingIntroPage:
 @pytest.fixture
 def invite_player_page(driver) -> InvitePlayerPage:
     return InvitePlayerPage(driver)
+
+
+
+
+
+@pytest.fixture
+def swing_pass_promo_code_page(driver) -> SwingPassPromoCodePage:
+    return SwingPassPromoCodePage(driver)

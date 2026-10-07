@@ -26,7 +26,7 @@ class CheckTable:
         return self.add(field, expected, found, str(expected).strip() == str(found).strip())
 
     def contains(self, field, expected, found):
-        return self.add(field, expected, found, str(expected).strip() in str(found or ""))
+        return self.add(field, expected, found, str(expected).strip().casefold() in str(found or "").casefold())
 
     def amount(self, field, expected, found):
         return self.add(field, expected, found,

@@ -37,7 +37,7 @@ def driver_overrides(request):
     overrides = device_overrides(device) if device is not None else {}
     if app:
         path = resolve_app_path(app)
-        if not os.path.exists(path):
+        if not path or not os.path.exists(path):
             pytest.fail(f"@pytest.mark.device app not found: {path}")
         overrides.update({"appium:app": path, "appium:enforceAppInstall": True})
     overrides.update(getattr(request, "param", None) or {})

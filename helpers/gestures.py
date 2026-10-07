@@ -56,6 +56,12 @@ def long_press(driver, element=None, x=None, y=None, duration=2.0):
     driver.execute_script("mobile: touchAndHold", params)
 
 
+def drag_coordinates(driver, start_x, start_y, end_x, end_y, duration=1.0):
+    driver.execute_script("mobile: dragFromToForDuration", {
+        "fromX": int(start_x), "fromY": int(start_y), "toX": int(end_x), "toY": int(end_y), "duration": duration,
+    })
+
+
 def swipe_coordinates(driver, start_x, start_y, end_x, end_y, duration_ms=800):
     actions = _pointer(driver)
     pointer = actions.pointer_action
