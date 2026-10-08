@@ -37,7 +37,7 @@ def hide(driver, key_name="done", strategy=None, outside=None):
     except Exception as exc:
         log.info(f"no dismiss key on this keyboard: {exc}")
     try:
-        if tap_return(driver) and not driver.is_keyboard_shown():
+        if tap_return(driver, arrow=False) and not driver.is_keyboard_shown():
             return True
     except Exception as exc:
         log.info(f"return key not tappable: {exc}")
@@ -92,13 +92,14 @@ def return_key(driver):
     return max(rects, key=lambda pair: (pair[1]["y"] + pair[1]["height"], pair[1]["x"] + pair[1]["width"]))[0]
 
 
-def tap_return(driver):
+def tap_return(driver, arrow=True):
+    """arrow=False never taps the unnamed bottom-right key - hiding the keyboard must not submit a form."""
     for label in RETURN_KEYS:
         elements = driver.find_elements(AppiumBy.ACCESSIBILITY_ID, label)
         if elements:
             elements[0].click()
             return label
-    key = return_key(driver)
+    key = return_key(driver) if arrow else None
     if key is not None:
         label = key.get_attribute("name") or key.get_attribute("label") or "arrow"
         key.click()
