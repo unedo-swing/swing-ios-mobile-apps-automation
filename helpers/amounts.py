@@ -4,6 +4,7 @@ DASHES = ("−", "–", "—")
 AMOUNT = re.compile(r"[+-]?\s*\d[\d.,]*")
 AMOUNT_LINE = re.compile(r"^[+-]?\s*\d[\d.,]*$")
 TIME = re.compile(r"\b\d{1,2}:\d{2}\b")
+CURRENCY = re.compile(r"(Rp\.?|RM|S\$|SGD|MYR|IDR|\$)\s*([+-]?\s*\d[\d.,]*)")
 
 
 def normalize(value):
@@ -21,6 +22,19 @@ def amount_text(value):
             return stripped
     match = AMOUNT.search(TIME.sub("", text))
     return match.group(0).strip() if match else ""
+
+
+def currency_of(value):
+    match = CURRENCY.search(normalize(value))
+    return match.group(1).rstrip(".") if match else ""
+
+
+def in_currency(value, currency):
+    """'Rp. 200,000 ≈ RM 47.62' in RM -> '47.62'; '' when that currency is not shown."""
+    for match in CURRENCY.finditer(normalize(value)):
+        if match.group(1).rstrip(".") == currency:
+            return match.group(2)
+    return ""
 
 
 def to_number(value):

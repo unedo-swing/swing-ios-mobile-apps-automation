@@ -9,7 +9,7 @@ WIDTH = 46
 
 
 def _cell(value):
-    text = " ".join(str("" if value is None else value).split())
+    text = " ".join(str("" if value is None else value).replace("≈", "~").split())
     return text if len(text) <= WIDTH else text[: WIDTH - 1] + "…"
 
 
@@ -29,8 +29,12 @@ class CheckTable:
         return self.add(field, expected, found, str(expected).strip().casefold() in str(found or "").casefold())
 
     def amount(self, field, expected, found):
+        currency = amounts.currency_of(expected)
+        found_amount = amounts.in_currency(found, currency) if currency else ""
+        if currency and not found_amount and amounts.currency_of(found):
+            return self.add(field, expected, found, False)
         return self.add(field, expected, found,
-                        abs(amounts.to_number(expected)) == abs(amounts.to_number(found)))
+                        abs(amounts.to_number(expected)) == abs(amounts.to_number(found_amount or found)))
 
     def truthy(self, field, found):
         return self.add(field, "any value", found, bool(str(found or "").strip()))
