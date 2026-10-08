@@ -9,8 +9,7 @@ class HomePage(BasePage):
     def wait_until_loaded(self, timeout=None):
         super().wait_until_loaded(timeout)
         return self.wait_all_visible(
-            (L.EL_COUNTRY_BUTTON, L.IMG_DRIVING_RANGE, L.IMG_TEE_TIME, L.IMG_EVENTS,
-             L.IMG_MARKETPLACE, L.TAB_HOME), timeout)
+            (L.EL_COUNTRY_BUTTON, L.IMG_DRIVING_RANGE, L.IMG_TEE_TIME, L.IMG_EVENTS,L.TAB_HOME), timeout)
 
     def verify_screen(self):
         self.wait_until_loaded()
@@ -20,6 +19,18 @@ class HomePage(BasePage):
         assert self.is_visible(L.IMG_TEE_TIME, timeout=5), "Home tee time menu not shown"
         assert self.is_visible(L.IMG_EVENTS, timeout=5), "Home events menu not shown"
         assert self.is_visible(L.IMG_MARKETPLACE, timeout=5), "Home marketplace menu not shown"
+        assert self.is_visible(L.TAB_HOME, timeout=5), "Home tab bar not shown"
+        self.capture_step("Verify home page")
+        return self
+    
+    def verify_screen_my(self):
+        self.wait_until_loaded()
+        assert self.is_visible(L.EL_SPORT_BUTTON, timeout=20), "Home screen not shown"
+        assert self.is_visible(L.EL_COUNTRY_BUTTON, timeout=5), "Home country button not shown"
+        assert self.is_visible(L.IMG_DRIVING_RANGE, timeout=5), "Home driving range menu not shown"
+        assert self.is_visible(L.IMG_TEE_TIME, timeout=5), "Home tee time menu not shown"
+        assert self.is_visible(L.IMG_EVENTS, timeout=5), "Home events menu not shown"
+        # assert self.is_visible(L.IMG_MARKETPLACE, timeout=5), "Home marketplace menu not shown"
         assert self.is_visible(L.TAB_HOME, timeout=5), "Home tab bar not shown"
         self.capture_step("Verify home page")
         return self

@@ -3,6 +3,7 @@ import pytest
 from flows.driving_range_flow import DrivingRangeFlow
 from flows.home_flow import HomeFlow
 from flows.login_flow import LoginFlow
+from flows.payment_callback_flow import PaymentCallbackFlow
 from flows.tee_time_flow import TeeTimeFlow
 from helpers.pdf_report import init_pdf
 from test_data.driving_range_test_data import DrivingRangeTestData as DR
@@ -13,7 +14,7 @@ from test_data.tee_time_test_data import TeeTimeTestData as TT
 def login_and_switch_region(D, login_flow: LoginFlow, home_flow: HomeFlow):
     login_flow.login_with_otp(D.COUNTRY_NAME, D.PHONE_NUMBER, D.METHOD_VERIFICATION, D.OTP)
     home_flow.skip_first_run_screens(D.SPORT_TYPE)
-    home_flow.verify_home()
+    home_flow.verify_home_my()
     if D.LOGIN_REGION:
         home_flow.verify_region(D.LOGIN_REGION)
     home_flow.select_region(D.REGION)
@@ -56,7 +57,7 @@ class TestDrivingRangeCrossCountry:
     @pytest.mark.app_reset("clear")
     @pytest.mark.cross_country
     @pytest.mark.parametrize("TC_ID", ["DR_CC_MY_ID_001", "DR_CC_MY_ID_002", "DR_CC_MY_ID_003", "DR_CC_MY_ID_004", "DR_CC_MY_ID_005", "DR_CC_MY_ID_006", "DR_CC_MY_ID_007", "DR_CC_MY_ID_008", "DR_CC_MY_ID_009", "DR_CC_MY_ID_010", "DR_CC_MY_ID_011", "DR_CC_MY_ID_012", "DR_CC_MY_ID_013", "DR_CC_MY_ID_014"])
-    def test_cross_country_my_to_id_book_driving_range_without_promo(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
+    def test_cross_country_my_to_id_book_driving_range_without_promo(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow, payment_callback_flow: PaymentCallbackFlow):
         DR.load(TC_ID)
         pdf = init_pdf(DR.TC_NAME, tc_id=TC_ID)
         login_and_switch_region(DR, login_flow, home_flow)
@@ -64,11 +65,12 @@ class TestDrivingRangeCrossCountry:
         payment_information = self._pay(driving_range_flow)
         booking_code = self._verify_success(driving_range_flow, payment_information)
         driving_range_flow.verify_data_booking_details_without_credit_used(booking_code, DR.PLAYER_NAME, DR.BOOKING_DATE, DR.BOOKING_START_TIME, DR.BOOKING_END_TIME, DR.NUMBER_OF_BAYS, payment_information, DR.BAY_TYPE)
+        payment_callback_flow.verify_existing_payment_callback(booking_code)
 
     @pytest.mark.app_reset("clear")
     @pytest.mark.cross_country
     @pytest.mark.parametrize("TC_ID", ["DR_CC_002"])
-    def test_cross_country_my_to_id_book_driving_range_with_swing_credits(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
+    def test_cross_country_my_to_id_book_driving_range_with_swing_credits(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow, payment_callback_flow: PaymentCallbackFlow):
         DR.load(TC_ID)
         pdf = init_pdf(DR.TC_NAME, tc_id=TC_ID)
         login_and_switch_region(DR, login_flow, home_flow)
@@ -77,6 +79,7 @@ class TestDrivingRangeCrossCountry:
         payment_information = self._pay(driving_range_flow, "1")
         booking_code = self._verify_success(driving_range_flow, payment_information)
         driving_range_flow.verify_data_booking_details_with_credit_used(booking_code, DR.PLAYER_NAME, DR.BOOKING_DATE, DR.BOOKING_START_TIME, DR.BOOKING_END_TIME, DR.NUMBER_OF_BAYS, payment_information, DR.BAY_TYPE)
+        payment_callback_flow.verify_existing_payment_callback(booking_code)
         driving_range_flow.back_to_activity()
         driving_range_flow.open_home_tab()
         driving_range_flow.open_swing_credits()
@@ -122,7 +125,7 @@ class TestTeeTimeCrossCountry:
     @pytest.mark.app_reset("clear")
     @pytest.mark.cross_country
     @pytest.mark.parametrize("TC_ID", ["TT_CC_MY_ID_001", "TT_CC_MY_ID_002", "TT_CC_MY_ID_003", "TT_CC_MY_ID_004", "TT_CC_MY_ID_005", "TT_CC_MY_ID_006", "TT_CC_MY_ID_007", "TT_CC_MY_ID_008", "TT_CC_MY_ID_009", "TT_CC_MY_ID_010", "TT_CC_MY_ID_011", "TT_CC_MY_ID_012", "TT_CC_MY_ID_013", "TT_CC_MY_ID_014"])
-    def test_cross_country_my_to_id_book_tee_time_without_promo(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow):
+    def test_cross_country_my_to_id_book_tee_time_without_promo(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow):
         TT.load(TC_ID)
         PLAYERS = load_players(TC_ID)
         pdf = init_pdf(TT.TC_NAME, tc_id=TC_ID)
@@ -130,12 +133,13 @@ class TestTeeTimeCrossCountry:
         self._open_booking(tee_time_flow)
         tee_time_flow.verify_booking_confirmation(TT.BOOKING_DATE, TT.SESSION, TT.PREFERRED_TIME, TT.BOOKING_METHOD, TT.TOTAL_PLAYERS)
         payment_information = self._pay(tee_time_flow, PLAYERS)
-        self._verify_success(tee_time_flow, PLAYERS, payment_information)
+        booking_code = self._verify_success(tee_time_flow, PLAYERS, payment_information)
+        payment_callback_flow.verify_existing_payment_callback(booking_code)
 
     @pytest.mark.app_reset("clear")
     @pytest.mark.cross_country
     @pytest.mark.parametrize("TC_ID", ["TT_CC_002"])
-    def test_cross_country_my_to_id_book_tee_time_with_swing_credits(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow):
+    def test_cross_country_my_to_id_book_tee_time_with_swing_credits(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, tee_time_flow: TeeTimeFlow, payment_callback_flow: PaymentCallbackFlow):
         TT.load(TC_ID)
         PLAYERS = load_players(TC_ID)
         pdf = init_pdf(TT.TC_NAME, tc_id=TC_ID)
@@ -146,6 +150,7 @@ class TestTeeTimeCrossCountry:
         payment_information = self._pay(tee_time_flow, PLAYERS, "1")
         tee_time_flow.verify_players_used_credits(payment_information, PLAYERS, TT.HOST_NAME)
         booking_code = self._verify_success(tee_time_flow, PLAYERS, payment_information)
+        payment_callback_flow.verify_existing_payment_callback(booking_code)
         tee_time_flow.back_to_activity()
         tee_time_flow.open_home_tab()
         tee_time_flow.open_swing_credits()

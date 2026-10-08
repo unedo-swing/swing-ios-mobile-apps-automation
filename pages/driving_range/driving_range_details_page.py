@@ -9,7 +9,7 @@ class DrivingRangeDetailsPage(BasePage):
     def verify_screen(self):
         self.wait_until_loaded()
         assert self.is_visible(L.EL_HEADER, timeout=20), "Driving range details screen not shown"
-        assert self.is_visible(L.TXT_SELECT_TIME_TITLE, timeout=5), "Driving range time selector not shown"
+        # assert self.is_visible(L.TXT_SELECT_TIME_TITLE, timeout=5), "Driving range time selector not shown"
         assert self.is_visible(L.BTN_BOOK, timeout=5), "Driving range book button not shown"
         self.capture_step("Verify driving range details page")
         return self

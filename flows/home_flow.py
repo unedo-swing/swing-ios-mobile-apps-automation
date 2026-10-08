@@ -73,6 +73,9 @@ class HomeFlow(BaseFlow):
 
     def verify_home(self):
         self.home.verify_screen()
+    
+    def verify_home_my(self):
+        self.home.verify_screen_my()
 
     def open_sport_option(self):
         self.home.open_sport_option()

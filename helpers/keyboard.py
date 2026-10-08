@@ -67,12 +67,43 @@ def tap_keyboard_key(driver, label):
     driver.find_element(AppiumBy.IOS_PREDICATE, f"name == '{label}'").click()
 
 
+RETURN_KEYS = ("Return", "return", "Go", "Done", "Search", "Next", "Send", "Continue", "Join", "Route")
+
+
+SYSTEM_KEYS = ("dictat", "microphone", "next keyboard", "emoji", "globe", "shift", "delete", "more")
+
+
+def _is_system_key(key):
+    name = f"{key.get_attribute('name') or ''} {key.get_attribute('label') or ''}".casefold()
+    return any(word in name for word in SYSTEM_KEYS)
+
+
+def return_key(driver):
+    """The key at the keyboard's bottom-right - on iOS 26 the return key can be just an arrow."""
+    keyboards = driver.find_elements(AppiumBy.CLASS_NAME, "XCUIElementTypeKeyboard")
+    if not keyboards:
+        return None
+    keys = keyboards[0].find_elements(AppiumBy.XPATH, ".//XCUIElementTypeButton | .//XCUIElementTypeKey")
+    rects = [(key, key.rect) for key in keys]
+    rects = [(key, rect) for key, rect in rects if rect["width"] > 0 and rect["height"] > 0
+             and not _is_system_key(key)]
+    if not rects:
+        return None
+    return max(rects, key=lambda pair: (pair[1]["y"] + pair[1]["height"], pair[1]["x"] + pair[1]["width"]))[0]
+
+
 def tap_return(driver):
-    for label in ("Return", "return", "Go", "Done", "Search", "Next", "Send"):
+    for label in RETURN_KEYS:
         elements = driver.find_elements(AppiumBy.ACCESSIBILITY_ID, label)
         if elements:
             elements[0].click()
             return label
+    key = return_key(driver)
+    if key is not None:
+        label = key.get_attribute("name") or key.get_attribute("label") or "arrow"
+        key.click()
+        log.info(f"tapped keyboard return key '{label}' (bottom-right)")
+        return label
     return None
 
 
