@@ -456,3 +456,45 @@ class EventFlow(BaseFlow):
         if status:
             assert self.registration.has_status(status), (
                 f"registration status {status} not shown")
+
+    def open_add_player_manually(self):
+        self.add_player()
+        self.open_add_manually()
+
+    def fill_manual_players(self, players):
+        for player in self.invitee_players(players):
+            self.fill_player(player.get("first_name"), player.get("last_name"), player.get("phone_number"))
+            if player.get("email"):
+                self.enter_player_email(player.get("email"))
+
+    def remove_players(self, players):
+        for player in self.invitee_players(players):
+            self.remove_player(player["player"])
+
+    def verify_players_removed(self, players):
+        table = CheckTable("Players removed")
+        for player in self.invitee_players(players):
+            shown = self.confirm.has_player(player["player"])
+            table.add(player["player"], "removed", "shown" if shown else "removed", not shown)
+        table.verify()
+
+    def verify_secure_slot_disabled(self):
+        table = CheckTable("Secure slot disabled")
+        enabled = self.details.secure_slot_is_enabled()
+        expected = "disabled"
+        table.add("Secure slot button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()
+
+    def verify_save_player_disabled(self):
+        table = CheckTable("Save player disabled")
+        enabled = self.player.save_player_is_enabled()
+        expected = "disabled"
+        table.add("Save player button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()
+
+    def verify_pay_now_disabled(self):
+        table = CheckTable("Pay now disabled")
+        enabled = self.confirm.pay_now_is_enabled()
+        expected = "disabled"
+        table.add("Pay now button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()

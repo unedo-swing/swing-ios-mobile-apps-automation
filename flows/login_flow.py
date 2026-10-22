@@ -91,4 +91,13 @@ class LoginFlow(BaseFlow):
     
     def verify_page_code_otp(self):
         self.verification_code.verify_screen()
-    
+
+    def enter_invalid_otp(self, code: str):
+        self.verification_code.enter_code(code)
+
+    def verify_button_continue_disabled(self):
+        table = CheckTable("Login continue button disabled")
+        enabled = self.login.continue_is_enabled()
+        expected = "disabled"
+        table.add("Continue button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()

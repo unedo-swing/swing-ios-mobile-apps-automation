@@ -78,3 +78,10 @@ class EventPackageFlow(BaseFlow):
             table.amount("Total price", total_price, summary)
         table.truthy("Confirm packages enabled", self.package.confirm_is_enabled())
         table.verify()
+
+    def verify_confirm_packages_disabled(self):
+        table = CheckTable("Confirm packages disabled")
+        enabled = self.package.confirm_is_enabled()
+        expected = "disabled"
+        table.add("Confirm packages button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()

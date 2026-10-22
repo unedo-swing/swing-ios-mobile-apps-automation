@@ -378,5 +378,59 @@ class DrivingRangeFlow(BaseFlow):
         table = CheckTable(f"Swing Credits used for {amounts.booking_tag(booking_code)}")
         table.amount("Credits used", total_amount, self.history.booking_amount_number(booking_code))
         table.verify()
-    
-    
+
+    def clear_search(self):
+        self.search.clear_search()
+
+    def verify_search_cleared(self):
+        table = CheckTable("Search cleared")
+        table.equal("Search keyword", "", self.search.search_value() or "")
+        table.verify()
+
+    def verify_past_dates_disabled(self):
+        table = CheckTable("Past dates")
+        disabled = self.calendar.disabled_day_count()
+        table.add("Disabled days", "more than 0", disabled, disabled > 0)
+        table.verify()
+
+    def remove_addons(self, items):
+        for item in items:
+            self.confirm.set_addon(item["add_ons_name"], 0)
+
+    def verify_addons(self, items):
+        table = CheckTable("Add-ons")
+        for item in items:
+            table.equal(item["add_ons_name"], str(item["add_ons_qty"]), str(self.confirm.item_quantity(item["add_ons_name"])))
+        table.verify()
+
+    def verify_addons_removed(self, items):
+        table = CheckTable("Add-ons removed")
+        for item in items:
+            table.equal(item["add_ons_name"], "0", str(self.confirm.item_quantity(item["add_ons_name"])))
+        table.verify()
+
+    def verify_no_promo_applied(self):
+        table = CheckTable("No promo applied")
+        table.equal("Promo button", "Apply promo", self.confirm.get_promo_in_btn_promo())
+        table.verify()
+
+    def verify_book_enabled(self):
+        table = CheckTable("Book driving range enabled")
+        enabled = self.details.book_is_enabled()
+        expected = "enabled"
+        table.add("Book button", expected, "enabled" if enabled else "disabled", enabled)
+        table.verify()
+
+    def verify_book_disabled(self):
+        table = CheckTable("Book driving range disabled")
+        enabled = self.details.book_is_enabled()
+        expected = "disabled"
+        table.add("Book button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()
+
+    def verify_pay_now_disabled(self):
+        table = CheckTable("Pay now disabled")
+        enabled = self.confirm.pay_now_is_enabled()
+        expected = "disabled"
+        table.add("Pay now button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()

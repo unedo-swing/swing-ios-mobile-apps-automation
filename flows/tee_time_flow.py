@@ -677,3 +677,37 @@ class TeeTimeFlow(BaseFlow):
                     for player in names)
         self.verify_used_credit_booking_code(
             booking_code, total or payment_information.get("used_credit", ""))
+
+    def clear_search(self):
+        self.search.clear_search()
+
+    def verify_search_result(self, name):
+        table = CheckTable("Golf course search result")
+        table.truthy(name, self.search.has_result(name))
+        table.verify()
+
+    def verify_search_cleared(self):
+        table = CheckTable("Search cleared")
+        table.equal("Search keyword", "", self.search.search_value() or "")
+        table.verify()
+
+    def verify_book_tee_time_enabled(self):
+        table = CheckTable("Book tee time enabled")
+        enabled = self.details.book_tee_time_is_enabled()
+        expected = "enabled"
+        table.add("Book tee time button", expected, "enabled" if enabled else "disabled", enabled)
+        table.verify()
+
+    def verify_book_tee_time_disabled(self):
+        table = CheckTable("Book tee time disabled")
+        enabled = self.details.book_tee_time_is_enabled()
+        expected = "disabled"
+        table.add("Book tee time button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()
+
+    def verify_pay_now_disabled(self):
+        table = CheckTable("Pay now disabled")
+        enabled = self.confirm.pay_now_is_enabled()
+        expected = "disabled"
+        table.add("Pay now button", expected, "enabled" if enabled else "disabled", not enabled)
+        table.verify()
