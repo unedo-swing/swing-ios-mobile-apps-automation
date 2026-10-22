@@ -27,26 +27,37 @@ def tap_outside(driver, locator=None):
     return True
 
 
+DISMISS_KEYS = ("Done", "done", "Hide keyboard", "Dismiss")
+
+
+def tap_dismiss_key(driver):
+    """Only a Done/Hide key inside the keyboard or its toolbar - never Return, Continue or an app button."""
+    containers = driver.find_elements(AppiumBy.CLASS_NAME, "XCUIElementTypeKeyboard")
+    containers += driver.find_elements(AppiumBy.CLASS_NAME, "XCUIElementTypeToolbar")
+    for container in containers:
+        for label in DISMISS_KEYS:
+            keys = container.find_elements(AppiumBy.ACCESSIBILITY_ID, label)
+            if keys:
+                keys[0].click()
+                log.info(f"tapped keyboard dismiss key '{label}'")
+                return label
+    return None
+
+
 def hide(driver, key_name="done", strategy=None, outside=None):
     if not driver.is_keyboard_shown():
         return False
-    try:
-        driver.execute_script("mobile: hideKeyboard", {"keys": [key_name, "Return"]})
-        if not driver.is_keyboard_shown():
-            return True
-    except Exception as exc:
-        log.info(f"no dismiss key on this keyboard: {exc}")
-    try:
-        if tap_return(driver, arrow=False) and not driver.is_keyboard_shown():
-            return True
-    except Exception as exc:
-        log.info(f"return key not tappable: {exc}")
     try:
         tap_outside(driver, outside)
         if not driver.is_keyboard_shown():
             return True
     except Exception as exc:
-        log.warning(f"tap outside failed: {exc}")
+        log.info(f"tap outside did not dismiss the keyboard: {exc}")
+    try:
+        if tap_dismiss_key(driver) and not driver.is_keyboard_shown():
+            return True
+    except Exception as exc:
+        log.info(f"no dismiss key on this keyboard: {exc}")
     log.warning("keyboard still shown after every dismiss attempt")
     return False
 
