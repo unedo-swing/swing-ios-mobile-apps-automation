@@ -189,7 +189,7 @@ class TestDrivingRange:
     
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression
-    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_018", "DR_EXISTING_018"])
+    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_018", "DR_EXISTING_027"])
     def test_book_without_promo_driving_range(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
         D.load(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
@@ -226,7 +226,7 @@ class TestDrivingRange:
     
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression
-    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_019", "DR_EXISTING_020", "DR_EXISTING_021", "DR_EXISTING_025"])
+    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_019", "DR_EXISTING_020", "DR_EXISTING_021", "DR_EXISTING_025", "DR_EXISTING_028", "DR_EXISTING_029"])
     def test_book_with_auto_applied_promo_driving_range(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
         D.load(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
@@ -262,7 +262,7 @@ class TestDrivingRange:
     
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression
-    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_023"])
+    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_023", "DR_EXISTING_031"])
     def test_book_with_apply_redeemed_promo_driving_range(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
         D.load(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
@@ -298,7 +298,7 @@ class TestDrivingRange:
             
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression
-    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_022"])
+    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_022", "DR_EXISTING_030"])
     def test_book_with_change_promo_driving_range(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
         D.load(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
@@ -334,7 +334,7 @@ class TestDrivingRange:
         
     @pytest.mark.app_reset("clear")
     @pytest.mark.regression
-    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_026"])
+    @pytest.mark.parametrize("TC_ID", ["DR_EXISTING_026", "DR_EXISTING_032"])
     def test_book_without_promo_using_credit_driving_range(self, TC_ID, login_flow: LoginFlow, home_flow: HomeFlow, driving_range_flow: DrivingRangeFlow):
         D.load(TC_ID)
         pdf = init_pdf(D.TC_NAME, tc_id=TC_ID)
