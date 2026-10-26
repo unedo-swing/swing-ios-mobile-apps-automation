@@ -77,9 +77,11 @@ class PdfReport:
         self.tc_id = tc_id
         self.created = time.time()
         self.path = None
+        self.failed = False
 
     def title(self):
-        return f"{self.tc_id} {self.name}" if self.tc_id else str(self.name)
+        title = f"{self.tc_id} {self.name}" if self.tc_id else str(self.name)
+        return f"FAILED - {title}" if self.failed else title
 
     def _document(self):
         from fpdf import FPDF
@@ -373,6 +375,7 @@ class PdfReport:
             return None
         folder = Path(directory) if directory else Path(settings.REPORT_DIR) / "pdf"
         folder.mkdir(parents=True, exist_ok=True)
+        self.failed = str(test.get("status")).lower() == "failed"
         self.path = folder / f"{_slug(self.title())}.pdf"
 
         steps = [entry for entry in test["steps"] if entry.get("evidence")]

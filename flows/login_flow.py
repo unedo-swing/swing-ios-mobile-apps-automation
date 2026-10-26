@@ -101,3 +101,19 @@ class LoginFlow(BaseFlow):
         expected = "disabled"
         table.add("Continue button", expected, "enabled" if enabled else "disabled", not enabled)
         table.verify()
+        
+    
+    def login_with_verification(self, home_flow, Data):
+        self.open_login()
+        self.choose_country(Data.COUNTRY_NAME)
+        self.enter_phone_number(Data.PHONE_NUMBER)
+        self.continue_log_in()
+        self.choose_verification_method(Data.METHOD_VERIFICATION)
+        self.verify_page_code_otp()
+        self.enter_otp_code(Data.OTP, Data.COUNTRY_NAME, Data.PHONE_NUMBER)
+        home_flow.select_sport_if_shown(Data.SPORT_TYPE)
+        home_flow.enable_notifications_if_shown()
+        home_flow.enable_location_if_shown()
+        home_flow.dismiss_coachmark_if_shown()
+        home_flow.close_whats_new_if_shown()
+        home_flow.verify_home()
